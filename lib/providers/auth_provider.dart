@@ -20,6 +20,23 @@ class AuthProvider extends ChangeNotifier {
     return true;
   }
 
+  Future<bool> sendSignupOtp({
+    required String name,
+    required String phone,
+    required String homeAddress,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    // TODO: Implement signup OTP sending logic
+    await Future.delayed(const Duration(seconds: 1));
+
+    _isLoading = false;
+    notifyListeners();
+    return true;
+  }
+
   Future<bool> resendOtp(String phone) async {
     _isLoading = true;
     _errorMessage = null;
@@ -33,7 +50,7 @@ class AuthProvider extends ChangeNotifier {
     return true;
   }
 
-  Future<bool> verifyOtp(String phone, String otp) async {
+  Future<bool> verifyOtp(String phone, String otp, {String? userName}) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
