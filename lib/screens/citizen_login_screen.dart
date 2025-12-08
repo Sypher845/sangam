@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import '../providers/user_provider.dart';
-import '../providers/auth_provider.dart';
+import 'package:sangam/constants/app_colors.dart';
+import 'package:sangam/constants/app_assets.dart';
+import 'package:sangam/constants/app_strings.dart';
+import 'package:sangam/providers/user_provider.dart';
+import 'package:sangam/providers/auth_provider.dart';
 import 'citizen_signup_screen.dart';
 
 class CitizenLoginScreen extends StatefulWidget {
@@ -28,7 +31,7 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
               height: double.infinity,
               decoration: const BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage('assets/background.png'),
+                  image: AssetImage(AppAssets.background),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -40,9 +43,9 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
                     // Back button
                     IconButton(
                       onPressed: () => Navigator.pop(context),
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.arrow_back,
-                        color: Color(0xFF2C3E50),
+                        color: AppColors.textPrimary,
                         size: 28,
                       ),
                     ),
@@ -55,10 +58,10 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
                         vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF3498DB).withValues(alpha: 0.1),
+                        color: AppColors.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: const Color(0xFF3498DB),
+                          color: AppColors.primary,
                           width: 1,
                         ),
                       ),
@@ -68,14 +71,14 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
                           Icon(
                             Icons.smartphone,
                             size: 16,
-                            color: const Color(0xFF3498DB),
+                            color: AppColors.primary,
                           ),
                           const SizedBox(width: 8),
-                          const Text(
-                            'Citizen Reporter',
+                          Text(
+                            AppStrings.citizenReporter,
                             style: TextStyle(
                               fontSize: 12,
-                              color: Color(0xFF3498DB),
+                              color: AppColors.primary,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -86,20 +89,20 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
                     const SizedBox(height: 40),
 
                     // Title
-                    const Text(
-                      'Welcome Back',
+                    Text(
+                      AppStrings.welcomeBack,
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF2C3E50),
+                        color: AppColors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      'Sign in to start reporting hazards and contribute to ocean intelligence',
+                    Text(
+                      AppStrings.loginSubtitle,
                       style: TextStyle(
                         fontSize: 14,
-                        color: Color(0xFF5D6D7E),
+                        color: AppColors.textSecondary,
                         height: 1.4,
                       ),
                     ),
@@ -108,18 +111,18 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
 
                     // Phone number input
                     if (!_isOtpSent) ...[
-                      const Text(
-                        'Mobile Number',
+                      Text(
+                        AppStrings.mobileNumber,
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF2C3E50),
+                          color: AppColors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.9),
+                          color: AppColors.white.withValues(alpha: 0.9),
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
@@ -136,12 +139,12 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
                             FilteringTextInputFormatter.digitsOnly,
                             LengthLimitingTextInputFormatter(10),
                           ],
-                          decoration: const InputDecoration(
-                            hintText: 'Enter your mobile number',
-                            hintStyle: TextStyle(color: Color(0xFF95A5A6)),
+                          decoration: InputDecoration(
+                            hintText: AppStrings.enterMobileNumber,
+                            hintStyle: TextStyle(color: AppColors.textHint),
                             prefixIcon: Icon(
                               Icons.phone,
-                              color: Color(0xFF3498DB),
+                              color: AppColors.primary,
                             ),
                             border: InputBorder.none,
                             contentPadding: EdgeInsets.all(16),
@@ -264,27 +267,27 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
                                 userProvider,
                               ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF3498DB),
+                          backgroundColor: AppColors.primary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                           elevation: 2,
                         ),
                         child: authProvider.isLoading || userProvider.isLoading
-                            ? const SizedBox(
+                            ? SizedBox(
                                 width: 20,
                                 height: 20,
                                 child: CircularProgressIndicator(
-                                  color: Colors.white,
+                                  color: AppColors.white,
                                   strokeWidth: 2,
                                 ),
                               )
                             : Text(
-                                _isOtpSent ? 'Verify & Login' : 'Send OTP',
-                                style: const TextStyle(
+                                _isOtpSent ? AppStrings.verifyAndLogin : AppStrings.sendOtp,
+                                style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.white,
+                                  color: AppColors.white,
                                 ),
                               ),
                       ),
@@ -334,17 +337,17 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
                           );
                         },
                         style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Color(0xFF3498DB)),
+                          side: BorderSide(color: AppColors.primary),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Text(
-                          'Create New Account',
+                        child: Text(
+                          AppStrings.createNewAccount,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF3498DB),
+                            color: AppColors.primary,
                           ),
                         ),
                       ),

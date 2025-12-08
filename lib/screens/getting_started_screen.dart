@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:async';
+import 'package:sangam/constants/app_colors.dart';
+import 'package:sangam/constants/app_assets.dart';
+import 'package:sangam/constants/app_strings.dart';
 import 'citizen_login_screen.dart';
 
 class GettingStartedScreen extends StatefulWidget {
@@ -16,13 +19,7 @@ class _GettingStartedScreenState extends State<GettingStartedScreen> {
   Timer? _timer;
   bool _imagesPrecached = false;
 
-  final List<String> _slideImages = [
-    'assets/getting started/zero.png',
-    'assets/getting started/one.jpeg',
-    'assets/getting started/two.jpeg',
-    'assets/getting started/three.jpeg',
-    'assets/getting started/for.jpeg',
-  ];
+  final List<String> _slideImages = AppAssets.sliderImages;
 
   @override
   void initState() {
@@ -77,7 +74,7 @@ class _GettingStartedScreenState extends State<GettingStartedScreen> {
         height: double.infinity,
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/background.png'),
+            image: AssetImage(AppAssets.background),
             fit: BoxFit.cover,
           ),
         ),
@@ -97,13 +94,13 @@ class _GettingStartedScreenState extends State<GettingStartedScreen> {
                         children: [
                           // INCOIS logo
                           Image.asset(
-                            'assets/getting started/INCOIS.png',
+                            AppAssets.incoisLogo,
                             height: 45,
                             fit: BoxFit.contain,
                           ),
                           // Bharat Sarkar logo
                           Image.asset(
-                            'assets/getting started/bharat_sarkar-removebg.png',
+                            AppAssets.bharatSarkarLogo,
                             height: 50,
                             fit: BoxFit.contain,
                           ),
@@ -157,18 +154,18 @@ class _GettingStartedScreenState extends State<GettingStartedScreen> {
                 const Spacer(),
                 // Sangam Logo
                 Image.asset(
-                  'assets/getting started/sangam logo\'.png',
+                  AppAssets.sangamLogo,
                   height: 120,
                   fit: BoxFit.contain,
                 ),
                 const SizedBox(height: 12),
                 // Tagline
-                const Text(
-                  'Empowering Communities,\nProtecting Ocean Together',
+                Text(
+                  AppStrings.gettingStartedTagline,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,
-                    color: Color(0xFF2C3E50),
+                    color: AppColors.textPrimary,
                     height: 1.5,
                     fontWeight: FontWeight.w500,
                   ),
@@ -207,12 +204,12 @@ class _GettingStartedScreenState extends State<GettingStartedScreen> {
                                     height: double.infinity,
                                     errorBuilder: (context, error, stackTrace) {
                                       return Container(
-                                        color: const Color(0xFFE0E0E0),
-                                        child: const Center(
+                                        color: AppColors.greyLight,
+                                        child: Center(
                                           child: Icon(
                                             Icons.image_not_supported,
                                             size: 50,
-                                            color: Color(0xFF9E9E9E),
+                                            color: AppColors.grey,
                                           ),
                                         ),
                                       );
@@ -235,8 +232,8 @@ class _GettingStartedScreenState extends State<GettingStartedScreen> {
                       height: 8,
                       decoration: BoxDecoration(
                         color: _currentPage == index
-                            ? const Color(0xFF3498DB)
-                            : const Color(0xFF3498DB).withValues(alpha: 0.3),
+                            ? AppColors.primary
+                            : AppColors.primary.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
@@ -257,19 +254,19 @@ class _GettingStartedScreenState extends State<GettingStartedScreen> {
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF3498DB),
+                        backgroundColor: AppColors.primary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
                         elevation: 3,
-                        shadowColor: const Color(0xFF3498DB).withValues(alpha: 0.4),
+                        shadowColor: AppColors.primary.withValues(alpha: 0.4),
                       ),
-                      child: const Text(
-                        'Get Started',
+                      child: Text(
+                        AppStrings.getStartedButton,
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: AppColors.white,
                           letterSpacing: 0.5,
                         ),
                       ),

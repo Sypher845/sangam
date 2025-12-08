@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-
-import '../providers/signup_provider.dart';
-import '../providers/auth_provider.dart';
+import 'package:sangam/constants/app_colors.dart';
+import 'package:sangam/constants/app_assets.dart';
+import 'package:sangam/constants/app_strings.dart';
+import 'package:sangam/providers/signup_provider.dart';
+import 'package:sangam/providers/auth_provider.dart';
 
 class CitizenSignUpScreen extends StatelessWidget {
   const CitizenSignUpScreen({super.key});
@@ -29,7 +31,7 @@ class _SignUpScreenContent extends StatelessWidget {
           height: double.infinity,
           decoration: const BoxDecoration(
             image: DecorationImage(
-              image: AssetImage('assets/background.png'),
+              image: AssetImage(AppAssets.background),
               fit: BoxFit.cover,
             ),
           ),
@@ -50,9 +52,9 @@ class _SignUpScreenContent extends StatelessWidget {
                             Navigator.of(context).maybePop();
                           }
                         },
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.arrow_back,
-                          color: Color(0xFF2C3E50),
+                          color: AppColors.textPrimary,
                           size: 28,
                         ),
                       ),
@@ -63,18 +65,18 @@ class _SignUpScreenContent extends StatelessWidget {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF3498DB).withValues(alpha: 0.1),
+                          color: AppColors.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: const Color(0xFF3498DB),
+                            color: AppColors.primary,
                             width: 1,
                           ),
                         ),
                         child: Text(
                           'Step ${provider.currentStep + 1} of 2',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
-                            color: Color(0xFF3498DB),
+                            color: AppColors.primary,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -102,20 +104,20 @@ class _SignUpScreenContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Create Account',
+        Text(
+          AppStrings.createAccount,
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF2C3E50),
+            color: AppColors.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
-        const Text(
-          'Join the network and start reporting hazards.',
+        Text(
+          AppStrings.signupSubtitle,
           style: TextStyle(
             fontSize: 14,
-            color: Color(0xFF5D6D7E),
+            color: AppColors.textSecondary,
             height: 1.4,
           ),
         ),
@@ -176,27 +178,27 @@ class _SignUpScreenContent extends StatelessWidget {
                 ? null
                 : () => _onSendOtp(context, provider),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF3498DB),
+              backgroundColor: AppColors.primary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
               elevation: 2,
             ),
             child: provider.isLoading
-                ? const SizedBox(
+                ? SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: Colors.white,
+                      color: AppColors.white,
                     ),
                   )
-                : const Text(
-                    'Send OTP',
+                : Text(
+                    AppStrings.sendOtp,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: AppColors.white,
                     ),
                   ),
           ),
@@ -209,20 +211,20 @@ class _SignUpScreenContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Verify Number',
+        Text(
+          AppStrings.verifyNumber,
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF2C3E50),
+            color: AppColors.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
         Text(
-          'We sent a code to +91 ${provider.phoneController.text}',
-          style: const TextStyle(
+          '${AppStrings.otpSentTo} ${provider.phoneController.text}',
+          style: TextStyle(
             fontSize: 14,
-            color: Color(0xFF5D6D7E),
+            color: AppColors.textSecondary,
           ),
         ),
         const SizedBox(height: 24),
@@ -246,10 +248,10 @@ class _SignUpScreenContent extends StatelessWidget {
           children: [
             TextButton(
               onPressed: () => _onResendOtp(context, provider),
-              child: const Text(
-                'Resend OTP',
+              child: Text(
+                AppStrings.resendOtp,
                 style: TextStyle(
-                  color: Color(0xFF3498DB),
+                  color: AppColors.primary,
                   fontSize: 14,
                 ),
               ),
@@ -267,27 +269,27 @@ class _SignUpScreenContent extends StatelessWidget {
                 ? null
                 : () => _onCreateAccount(context, provider),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF3498DB),
+              backgroundColor: AppColors.primary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
               elevation: 2,
             ),
             child: provider.isLoading
-                ? const SizedBox(
+                ? SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: Colors.white,
+                      color: AppColors.white,
                     ),
                   )
-                : const Text(
-                    'Create Account',
+                : Text(
+                    AppStrings.createNewAccount,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: AppColors.white,
                     ),
                   ),
           ),
@@ -309,16 +311,16 @@ class _SignUpScreenContent extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF2C3E50),
+            color: AppColors.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.9),
+            color: AppColors.white.withValues(alpha: 0.9),
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
@@ -334,13 +336,13 @@ class _SignUpScreenContent extends StatelessWidget {
             inputFormatters: inputFormatters,
             decoration: InputDecoration(
               hintText: hintText,
-              hintStyle: const TextStyle(color: Color(0xFF95A5A6)),
+              hintStyle: TextStyle(color: AppColors.textHint),
               prefixIcon: Icon(
                 icon,
-                color: Color(0xFF3498DB),
+                color: AppColors.primary,
               ),
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.all(16),
+              contentPadding: EdgeInsets.all(16),
             ),
           ),
         ),
