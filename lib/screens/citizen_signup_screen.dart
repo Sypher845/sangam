@@ -6,6 +6,7 @@ import 'package:sangam/constants/app_assets.dart';
 import 'package:sangam/constants/app_strings.dart';
 import 'package:sangam/providers/signup_provider.dart';
 import 'package:sangam/providers/auth_provider.dart';
+import 'home_screen.dart';
 
 class CitizenSignUpScreen extends StatelessWidget {
   const CitizenSignUpScreen({super.key});
@@ -434,7 +435,9 @@ class _SignUpScreenContent extends StatelessWidget {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Account created')));
-      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(auth.errorMessage ?? 'Signup failed')),

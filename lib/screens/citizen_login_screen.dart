@@ -7,6 +7,7 @@ import 'package:sangam/constants/app_strings.dart';
 import 'package:sangam/providers/user_provider.dart';
 import 'package:sangam/providers/auth_provider.dart';
 import 'citizen_signup_screen.dart';
+import 'home_screen.dart';
 
 class CitizenLoginScreen extends StatefulWidget {
   const CitizenLoginScreen({super.key});
@@ -441,8 +442,10 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
             backgroundColor: Colors.green,
           ),
         );
-        // Navigate back to root and let AuthWrapper handle the routing
-        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+        // Navigate to home screen
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
       } else if (mounted && authProvider.errorMessage != null) {
         scaffoldMessenger.showSnackBar(
           SnackBar(
