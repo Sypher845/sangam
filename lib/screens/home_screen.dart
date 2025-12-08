@@ -31,12 +31,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   // Fixed radius for nearby tweets (30km)
   static const double _radiusKm = 30.0;
 
-  // Default location (Mumbai, India)
-  static const CameraPosition _initialPosition = CameraPosition(
-    target: LatLng(19.0760, 72.8777),
-    zoom: 11,
-  );
-
   @override
   void initState() {
     super.initState();
@@ -68,9 +62,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       // Get current location first
       await _getCurrentLocation();
 
-      // Use current location or default location
-      final double lat = _currentPosition?.latitude ?? 19.0760;
-      final double lng = _currentPosition?.longitude ?? 72.8777;
+      // Check if we have a valid location
+      if (_currentPosition == null) {
+        setState(() {
+          _errorMessage = 'Location not available. Please enable location services and grant permission.';
+          _isLoading = false;
+        });
+        return;
+      }
+
+      // Use ONLY the accurate current location
+      final double lat = _currentPosition!.latitude;
+      final double lng = _currentPosition!.longitude;
+
+      debugPrint('📡 Fetching reports for ACCURATE location: $lat, $lng (radius: ${_radiusKm}km)');
 
       // Fetch verified tweets first with location
       final verifiedResponse = await _tweetService.getVerifiedTweets(
@@ -79,12 +84,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         radius: _radiusKm.toInt(),
       );
       
+      debugPrint('✅ Verified tweets: ${verifiedResponse.data?.length ?? 0}');
+      
       // Fetch unverified tweets with location
       final unverifiedResponse = await _tweetService.getUnverifiedTweets(
         latitude: lat,
         longitude: lng,
         radius: _radiusKm.toInt(),
       );
+      
+      debugPrint('✅ Unverified tweets: ${unverifiedResponse.data?.length ?? 0}');
 
       if (verifiedResponse.isSuccess || unverifiedResponse.isSuccess) {
         setState(() {
@@ -114,9 +123,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Future<void> _getCurrentLocation() async {
     try {
+      debugPrint('🌍 Attempting to get current location...');
       final position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.medium,
       );
+      debugPrint('✅ Location obtained: ${position.latitude}, ${position.longitude}');
       setState(() {
         _currentPosition = position;
       });
@@ -124,7 +135,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       _updateMapMarkers();
     } catch (e) {
       // Use default location if getting current location fails
-      debugPrint('Failed to get current location: $e');
+      debugPrint('❌ Failed to get current location: $e');
+      debugPrint('📍 Using default location (Mumbai)');
     }
   }
 
@@ -335,7 +347,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         // Header
         SafeArea(child: _buildHeader()),
 
-        // Draggable Reports section
+        // Draggable Reports section - extends to full bottom
         Positioned(
           left: 0,
           right: 0,
@@ -345,7 +357,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             onVerticalDragUpdate: (details) {
               setState(() {
                 _sheetHeight -= details.delta.dy / screenHeight;
-                _sheetHeight = _sheetHeight.clamp(0.2, 0.8);
+                _sheetHeight = _sheetHeight.clamp(0.15, 0.7);
               });
             },
             child: _buildReportsSection(),
@@ -356,41 +368,113 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildGoogleMap() {
-    // Create markers from tweets
-    final Set<Marker> markers = _tweets.map((tweet) {
-      return Marker(
-        markerId: MarkerId('tweet_${tweet.id}'),
-        position: LatLng(tweet.latitude, tweet.longitude),
-        infoWindow: InfoWindow(
-          title: tweet.hazardType.isNotEmpty ? tweet.hazardType : tweet.title,
-          snippet: tweet.area,
-        ),
-        icon: BitmapDescriptor.defaultMarkerWithHue(
-          _getMarkerColor(tweet.hazardType.isNotEmpty ? tweet.hazardType : tweet.title),
+    // If location not available yet, show loading overlay
+    if (_currentPosition == null) {
+      return Container(
+        color: Colors.grey.shade200,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator(color: Color(0xFF3498DB)),
+              const SizedBox(height: 16),
+              Text(
+                'Getting your location...',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey.shade700,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Please ensure location services are enabled',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
         ),
       );
-    }).toSet();
+    }
+
+    // Create circles for hotspots and center dots
+    final List<Circle> allCircles = [];
+    
+    for (var tweet in _tweets) {
+      final bool isVerified = tweet.isVerified;
+      final LatLng position = LatLng(tweet.latitude, tweet.longitude);
+      
+      // Large hotspot circle (12km for verified, 5km for unverified)
+      final double radiusMeters = isVerified ? 12000.0 : 5000.0;
+      final Color fillColor = isVerified 
+          ? Colors.red.withOpacity(0.25) 
+          : Colors.grey.withOpacity(0.25);
+      final Color strokeColor = isVerified 
+          ? Colors.red.withOpacity(0.6) 
+          : Colors.grey.withOpacity(0.6);
+
+      allCircles.add(Circle(
+        circleId: CircleId('hotspot_${tweet.id}'),
+        center: position,
+        radius: radiusMeters,
+        fillColor: fillColor,
+        strokeColor: strokeColor,
+        strokeWidth: 2,
+      ));
+      
+      // Small center dot (red for verified, grey for unverified)
+      final Color dotColor = isVerified ? Colors.red.shade800 : Colors.grey.shade700;
+      
+      allCircles.add(Circle(
+        circleId: CircleId('dot_${tweet.id}'),
+        center: position,
+        radius: 200, // 200 meter radius for visible center dot
+        fillColor: dotColor,
+        strokeColor: dotColor,
+        strokeWidth: 0,
+      ));
+    }
+    
+    // Add user location marker (blue dot with white border)
+    allCircles.add(Circle(
+      circleId: const CircleId('user_location_border'),
+      center: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
+      radius: 150, // White border
+      fillColor: Colors.white,
+      strokeColor: Colors.white,
+      strokeWidth: 0,
+    ));
+    
+    allCircles.add(Circle(
+      circleId: const CircleId('user_location'),
+      center: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
+      radius: 100, // Blue dot
+      fillColor: Colors.blue.shade600,
+      strokeColor: Colors.blue.shade600,
+      strokeWidth: 0,
+    ));
 
     return GestureDetector(
       onTap: _onMapTapped,
       child: GoogleMap(
-        initialCameraPosition: _currentPosition != null
-            ? CameraPosition(
-                target: LatLng(
-                  _currentPosition!.latitude,
-                  _currentPosition!.longitude,
-                ),
-                zoom: 11,
-              )
-            : _initialPosition,
+        initialCameraPosition: CameraPosition(
+          target: LatLng(
+            _currentPosition!.latitude,
+            _currentPosition!.longitude,
+          ),
+          zoom: 12,
+        ),
         onMapCreated: (GoogleMapController controller) {
           _mapController = controller;
         },
-        myLocationEnabled: true,
+        myLocationEnabled: false, // Disable default location indicator
         myLocationButtonEnabled: true,
         zoomControlsEnabled: false,
         mapType: MapType.normal,
-        markers: markers,
+        circles: allCircles.toSet(),
       ),
     );
   }
@@ -423,13 +507,25 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
-            'Aqua X',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+          // Sangam Logo with circular white background
+          Container(
+            padding: const EdgeInsets.all(3),
+            decoration: BoxDecoration(
               color: Colors.white,
-              shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Image.asset(
+              'assets/getting started/sangam logo\'.png',
+              height: 50,
+              width: 50,
+              fit: BoxFit.contain,
             ),
           ),
           GestureDetector(
@@ -442,21 +538,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               );
             },
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: Colors.black.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Row(
-                children: [
-                  const Icon(Icons.person, color: Colors.white, size: 20),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'User',
-                    style: TextStyle(fontSize: 16, color: Colors.white),
-                  ),
-                ],
-              ),
+              child: const Icon(Icons.person, color: Colors.white, size: 24),
             ),
           ),
         ],
@@ -647,7 +734,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     onRefresh: _refreshTweets,
                     child: ListView.builder(
                       controller: _scrollController,
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                       itemCount: _tweets.length + (_verifiedTweets.isNotEmpty && _unverifiedTweets.isNotEmpty ? 2 : _verifiedTweets.isNotEmpty || _unverifiedTweets.isNotEmpty ? 1 : 0),
                       itemBuilder: (context, index) {
                         // Show verified section header
@@ -934,16 +1021,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               tweet.isUpvoted
                                   ? Icons.thumb_up
                                   : Icons.thumb_up_outlined,
-                              size: 14,
+                              size: 18,
                               color: tweet.isUpvoted
                                   ? const Color(0xFF3498DB)
                                   : Colors.grey.shade600,
                             ),
-                            const SizedBox(width: 4),
+                            const SizedBox(width: 6),
                             Text(
                               '${tweet.upvoteCount}',
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: 13,
                                 color: tweet.isUpvoted
                                     ? const Color(0xFF3498DB)
                                     : Colors.grey.shade600,

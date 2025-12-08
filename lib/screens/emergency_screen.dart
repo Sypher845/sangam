@@ -25,7 +25,7 @@ class EmergencyScreen extends StatelessWidget {
       child: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.only(bottom: 100), // Space for navigation bar
+            padding: const EdgeInsets.only(bottom: 20), // Minimal padding for navbar
             child: Column(
               children: [
             // Header with red background

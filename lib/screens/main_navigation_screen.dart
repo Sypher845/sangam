@@ -15,21 +15,11 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   late int _selectedIndex;
-  final PermissionService _permissionService = PermissionService();
 
   @override
   void initState() {
     super.initState();
     _selectedIndex = widget.initialIndex;
-    _requestLocationPermission();
-  }
-
-  Future<void> _requestLocationPermission() async {
-    // Request location permission on app start
-    final hasPermission = await _permissionService.hasLocationPermission();
-    if (!hasPermission && mounted) {
-      await _permissionService.requestLocationPermission();
-    }
   }
 
   void _onNavigationTap(int index) {
@@ -46,6 +36,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   Widget build(BuildContext context) {
     debugPrint('MainNavigationScreen build: _selectedIndex=$_selectedIndex');
     return Scaffold(
+      extendBody: true,
       body: IndexedStack(
         index: _selectedIndex,
         children: [
@@ -77,7 +68,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.white.withOpacity(0.95),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(

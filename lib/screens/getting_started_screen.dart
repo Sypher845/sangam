@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:sangam/constants/app_colors.dart';
 import 'package:sangam/constants/app_assets.dart';
 import 'package:sangam/constants/app_strings.dart';
+import 'package:sangam/services/permission_service.dart';
 import 'citizen_login_screen.dart';
 
 class GettingStartedScreen extends StatefulWidget {
@@ -18,6 +19,7 @@ class _GettingStartedScreenState extends State<GettingStartedScreen> {
   int _currentPage = 0;
   Timer? _timer;
   bool _imagesPrecached = false;
+  final PermissionService _permissionService = PermissionService();
 
   final List<String> _slideImages = AppAssets.sliderImages;
 
@@ -25,6 +27,156 @@ class _GettingStartedScreenState extends State<GettingStartedScreen> {
   void initState() {
     super.initState();
     _startAutoSlide();
+    _requestLocationPermissionEarly();
+  }
+
+  Future<void> _requestLocationPermissionEarly() async {
+    // Wait a bit for the screen to render
+    await Future.delayed(const Duration(seconds: 2));
+    
+    if (!mounted) return;
+    
+    // Check if location permission is already granted
+    final hasPermission = await _permissionService.hasLocationPermission();
+    
+    if (!hasPermission && mounted) {
+      // Show explanation dialog
+      final shouldRequest = await _showLocationPermissionDialog();
+      
+      if (shouldRequest && mounted) {
+        // Request location permission
+        await _permissionService.requestLocationPermission();
+      }
+    }
+  }
+
+  Future<bool> _showLocationPermissionDialog() async {
+    return await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF3498DB).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.location_on,
+                  color: Color(0xFF3498DB),
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  'Location Access',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Sangam needs your location to provide you with:',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 16),
+              _buildPermissionReason(
+                Icons.map_outlined,
+                'Nearby hazard reports',
+                'See water pollution and hazards in your area',
+              ),
+              const SizedBox(height: 12),
+              _buildPermissionReason(
+                Icons.my_location,
+                'Accurate map positioning',
+                'Center the map on your current location',
+              ),
+              const SizedBox(height: 12),
+              _buildPermissionReason(
+                Icons.add_location_alt,
+                'Report tagging',
+                'Automatically tag your reports with location',
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(
+                'Not Now',
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF3498DB),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text(
+                'Allow Location',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        );
+      },
+    ) ?? false;
+  }
+
+  Widget _buildPermissionReason(IconData icon, String title, String description) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: const Color(0xFF3498DB).withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 20, color: const Color(0xFF3498DB)),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF2C3E50),
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                description,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 
   @override
