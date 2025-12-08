@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:sangam/constants/app_colors.dart';
-import 'package:sangam/constants/app_assets.dart';
-import 'package:sangam/constants/app_strings.dart';
-import 'package:sangam/providers/user_provider.dart';
-import 'package:sangam/providers/auth_provider.dart';
+import '../providers/user_provider.dart';
+import '../providers/auth_provider.dart';
 import 'citizen_signup_screen.dart';
 import 'home_screen.dart';
 
@@ -26,16 +23,16 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
     return Consumer2<UserProvider, AuthProvider>(
       builder: (context, userProvider, authProvider, child) {
         return Scaffold(
-          body: SafeArea(
-            child: Container(
-              width: double.infinity,
-              height: double.infinity,
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage(AppAssets.background),
-                  fit: BoxFit.cover,
-                ),
+          body: Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/background.png'),
+                fit: BoxFit.cover,
               ),
+            ),
+            child: SafeArea(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(20.0),
                 child: Column(
@@ -44,9 +41,9 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
                     // Back button
                     IconButton(
                       onPressed: () => Navigator.pop(context),
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.arrow_back,
-                        color: AppColors.textPrimary,
+                        color: Color(0xFF2C3E50),
                         size: 28,
                       ),
                     ),
@@ -59,10 +56,10 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
                         vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.1),
+                        color: const Color(0xFF3498DB).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: AppColors.primary,
+                          color: const Color(0xFF3498DB),
                           width: 1,
                         ),
                       ),
@@ -72,14 +69,14 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
                           Icon(
                             Icons.smartphone,
                             size: 16,
-                            color: AppColors.primary,
+                            color: const Color(0xFF3498DB),
                           ),
                           const SizedBox(width: 8),
-                          Text(
-                            AppStrings.citizenReporter,
+                          const Text(
+                            'Citizen Reporter',
                             style: TextStyle(
                               fontSize: 12,
-                              color: AppColors.primary,
+                              color: Color(0xFF3498DB),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -90,20 +87,20 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
                     const SizedBox(height: 40),
 
                     // Title
-                    Text(
-                      AppStrings.welcomeBack,
+                    const Text(
+                      'Welcome Back',
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                        color: Color(0xFF2C3E50),
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Text(
-                      AppStrings.loginSubtitle,
+                    const Text(
+                      'Sign in to start reporting hazards and contribute to ocean intelligence',
                       style: TextStyle(
                         fontSize: 14,
-                        color: AppColors.textSecondary,
+                        color: Color(0xFF5D6D7E),
                         height: 1.4,
                       ),
                     ),
@@ -112,18 +109,18 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
 
                     // Phone number input
                     if (!_isOtpSent) ...[
-                      Text(
-                        AppStrings.mobileNumber,
+                      const Text(
+                        'Mobile Number',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
+                          color: Color(0xFF2C3E50),
                         ),
                       ),
                       const SizedBox(height: 8),
                       Container(
                         decoration: BoxDecoration(
-                          color: AppColors.white.withValues(alpha: 0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
@@ -140,12 +137,12 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
                             FilteringTextInputFormatter.digitsOnly,
                             LengthLimitingTextInputFormatter(10),
                           ],
-                          decoration: InputDecoration(
-                            hintText: AppStrings.enterMobileNumber,
-                            hintStyle: TextStyle(color: AppColors.textHint),
+                          decoration: const InputDecoration(
+                            hintText: 'Enter your mobile number',
+                            hintStyle: TextStyle(color: Color(0xFF95A5A6)),
                             prefixIcon: Icon(
                               Icons.phone,
-                              color: AppColors.primary,
+                              color: Color(0xFF3498DB),
                             ),
                             border: InputBorder.none,
                             contentPadding: EdgeInsets.all(16),
@@ -268,27 +265,27 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
                                 userProvider,
                               ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
+                          backgroundColor: const Color(0xFF3498DB),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                           elevation: 2,
                         ),
                         child: authProvider.isLoading || userProvider.isLoading
-                            ? SizedBox(
+                            ? const SizedBox(
                                 width: 20,
                                 height: 20,
                                 child: CircularProgressIndicator(
-                                  color: AppColors.white,
+                                  color: Colors.white,
                                   strokeWidth: 2,
                                 ),
                               )
                             : Text(
-                                _isOtpSent ? AppStrings.verifyAndLogin : AppStrings.sendOtp,
-                                style: TextStyle(
+                                _isOtpSent ? 'Verify & Login' : 'Send OTP',
+                                style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
-                                  color: AppColors.white,
+                                  color: Colors.white,
                                 ),
                               ),
                       ),
@@ -338,17 +335,17 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
                           );
                         },
                         style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: AppColors.primary),
+                          side: const BorderSide(color: Color(0xFF3498DB)),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: Text(
-                          AppStrings.createNewAccount,
+                        child: const Text(
+                          'Create New Account',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.primary,
+                            color: Color(0xFF3498DB),
                           ),
                         ),
                       ),
@@ -443,8 +440,9 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
           ),
         );
         // Navigate to home screen
-        Navigator.of(context).pushReplacement(
+        Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const HomeScreen()),
+          (route) => false,
         );
       } else if (mounted && authProvider.errorMessage != null) {
         scaffoldMessenger.showSnackBar(
