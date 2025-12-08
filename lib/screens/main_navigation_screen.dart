@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'emergency_screen.dart';
 import 'camera_capture_page.dart';
+import 'weather_screen.dart';
 import '../services/permission_service.dart';
 
 class MainNavigationScreen extends StatefulWidget {
@@ -43,7 +44,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           HomeScreenContent(onNavigationTap: _onNavigationTap, currentIndex: _selectedIndex),
           const Center(child: Text('Social Media - Coming Soon', style: TextStyle(fontSize: 24))),
           const Center(child: Text('Camera Capture', style: TextStyle(fontSize: 24))),
-          const Center(child: Text('Weather - Coming Soon', style: TextStyle(fontSize: 24))),
+          const WeatherScreen(),
           const EmergencyScreen(),
         ],
       ),
