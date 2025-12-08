@@ -120,6 +120,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       setState(() {
         _currentPosition = position;
       });
+      // Update map to center on user's location
+      _updateMapMarkers();
     } catch (e) {
       // Use default location if getting current location fails
       debugPrint('Failed to get current location: $e');
@@ -127,9 +129,21 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _updateMapMarkers() {
-    if (_mapController != null && _tweets.isNotEmpty) {
-      // Optionally animate to show all markers
-      // You can implement bounds calculation here if needed
+    if (_mapController != null) {
+      // Animate to user's location if available
+      if (_currentPosition != null) {
+        _mapController!.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(
+              target: LatLng(
+                _currentPosition!.latitude,
+                _currentPosition!.longitude,
+              ),
+              zoom: 12,
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -153,27 +167,142 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _handleUpvote(Tweet tweet) async {
+    // Prevent multiple upvotes if already upvoted
+    if (tweet.isUpvoted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.info_outline, color: Colors.white),
+              SizedBox(width: 8),
+              Text('You have already upvoted this report'),
+            ],
+          ),
+          backgroundColor: Colors.orange,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    // Optimistically update UI
+    final tweetIndex = _tweets.indexWhere((t) => t.id == tweet.id);
+    if (tweetIndex != -1) {
+      setState(() {
+        _tweets[tweetIndex] = tweet.copyWith(
+          isUpvoted: true,
+          upvoteCount: tweet.upvoteCount + 1,
+        );
+        
+        // Update in verified/unverified lists too
+        final verifiedIndex = _verifiedTweets.indexWhere((t) => t.id == tweet.id);
+        if (verifiedIndex != -1) {
+          _verifiedTweets[verifiedIndex] = _tweets[tweetIndex];
+        }
+        
+        final unverifiedIndex = _unverifiedTweets.indexWhere((t) => t.id == tweet.id);
+        if (unverifiedIndex != -1) {
+          _unverifiedTweets[unverifiedIndex] = _tweets[tweetIndex];
+        }
+      });
+    }
+
     try {
       final response = await _tweetService.upvoteTweet(tweet.id);
       if (response.isSuccess) {
-        // Refresh tweets to get updated upvote status
+        // Refresh reports to get updated data from server
         await _refreshTweets();
+        
+        // Show success feedback
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Row(
+                children: [
+                  Icon(Icons.thumb_up, color: Colors.white, size: 18),
+                  SizedBox(width: 8),
+                  Text('Report upvoted successfully'),
+                ],
+              ),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
       } else {
+        // Revert optimistic update on failure
+        if (tweetIndex != -1) {
+          setState(() {
+            _tweets[tweetIndex] = tweet.copyWith(
+              isUpvoted: false,
+              upvoteCount: tweet.upvoteCount,
+            );
+            
+            // Revert in verified/unverified lists too
+            final verifiedIndex = _verifiedTweets.indexWhere((t) => t.id == tweet.id);
+            if (verifiedIndex != -1) {
+              _verifiedTweets[verifiedIndex] = _tweets[tweetIndex];
+            }
+            
+            final unverifiedIndex = _unverifiedTweets.indexWhere((t) => t.id == tweet.id);
+            if (unverifiedIndex != -1) {
+              _unverifiedTweets[unverifiedIndex] = _tweets[tweetIndex];
+            }
+          });
+        }
+        
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(response.message ?? 'Failed to upvote tweet'),
+              content: Row(
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.white),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(response.message ?? 'Failed to upvote report'),
+                  ),
+                ],
+              ),
               backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
             ),
           );
         }
       }
     } catch (e) {
+      // Revert optimistic update on error
+      if (tweetIndex != -1) {
+        setState(() {
+          _tweets[tweetIndex] = tweet.copyWith(
+            isUpvoted: false,
+            upvoteCount: tweet.upvoteCount,
+          );
+          
+          // Revert in verified/unverified lists too
+          final verifiedIndex = _verifiedTweets.indexWhere((t) => t.id == tweet.id);
+          if (verifiedIndex != -1) {
+            _verifiedTweets[verifiedIndex] = _tweets[tweetIndex];
+          }
+          
+          final unverifiedIndex = _unverifiedTweets.indexWhere((t) => t.id == tweet.id);
+          if (unverifiedIndex != -1) {
+            _unverifiedTweets[unverifiedIndex] = _tweets[tweetIndex];
+          }
+        });
+      }
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: ${e.toString()}'),
+            content: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.white),
+                const SizedBox(width: 8),
+                Expanded(child: Text('Error: ${e.toString()}')),
+              ],
+            ),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -233,11 +362,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         markerId: MarkerId('tweet_${tweet.id}'),
         position: LatLng(tweet.latitude, tweet.longitude),
         infoWindow: InfoWindow(
-          title: tweet.title,
-          snippet: '${tweet.hazardType} - ${tweet.area}',
+          title: tweet.hazardType.isNotEmpty ? tweet.hazardType : tweet.title,
+          snippet: tweet.area,
         ),
         icon: BitmapDescriptor.defaultMarkerWithHue(
-          _getMarkerColor(tweet.hazardType),
+          _getMarkerColor(tweet.hazardType.isNotEmpty ? tweet.hazardType : tweet.title),
         ),
       );
     }).toSet();
@@ -730,30 +859,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     children: [
                       Expanded(
                         child: Text(
-                          tweet.title,
+                          tweet.hazardType.isNotEmpty ? tweet.hazardType : tweet.title,
                           style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
                             color: Color(0xFF2C3E50),
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.shade50,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: const Color(0xFF3498DB)),
-                        ),
-                        child: Text(
-                          tweet.hazardType,
-                          style: const TextStyle(
-                            fontSize: 10,
-                            color: Color(0xFF3498DB),
-                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),

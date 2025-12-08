@@ -381,20 +381,8 @@ class HazardPreviewPage extends StatefulWidget {
 class _HazardPreviewPageState extends State<HazardPreviewPage> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-  String _selectedHazardType = 'Ocean Pollution';
   bool _isSubmitting = false;
   final TweetService _tweetService = TweetService();
-
-  final List<String> _hazardTypes = [
-    'Ocean Pollution',
-    'Marine Life Disturbance',
-    'Water Quality Issue',
-    'Coastal Erosion',
-    'Oil Spill',
-    'Plastic Waste',
-    'Chemical Contamination',
-    'Other',
-  ];
 
   @override
   void dispose() {
@@ -426,16 +414,16 @@ class _HazardPreviewPageState extends State<HazardPreviewPage> {
 
   Future<void> _submitHazardReport() async {
     // Validate form fields
-    final title = _titleController.text.trim();
+    final hazardType = _titleController.text.trim();
     final description = _descriptionController.text.trim();
 
-    if (title.isEmpty) {
-      _showValidationError('Please enter a title for the hazard report');
+    if (hazardType.isEmpty) {
+      _showValidationError('Please enter a hazard type for the report');
       return;
     }
 
-    if (title.length < 3) {
-      _showValidationError('Title must be at least 3 characters long');
+    if (hazardType.length < 3) {
+      _showValidationError('Hazard type must be at least 3 characters long');
       return;
     }
 
@@ -498,8 +486,9 @@ class _HazardPreviewPageState extends State<HazardPreviewPage> {
       }
 
       // Submit hazard report with real API call
+      // Note: hazardType is now in title field, and title is set to hazardType
       final response = await _tweetService.createTweet(
-        hazardType: _selectedHazardType,
+        hazardType: _titleController.text.trim(),
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
         latitude: widget.location!.latitude,
@@ -701,47 +690,9 @@ class _HazardPreviewPageState extends State<HazardPreviewPage> {
 
             const SizedBox(height: 20),
 
-            // Hazard type dropdown
+            // Hazard Type field (replaces both dropdown and title)
             const Text(
               'Hazard Type *',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF2C3E50),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade300),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  value: _selectedHazardType,
-                  isExpanded: true,
-                  items: _hazardTypes.map((String type) {
-                    return DropdownMenuItem<String>(
-                      value: type,
-                      child: Text(type),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    if (newValue != null) {
-                      setState(() => _selectedHazardType = newValue);
-                    }
-                  },
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // Title field
-            const Text(
-              'Title *',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -753,7 +704,7 @@ class _HazardPreviewPageState extends State<HazardPreviewPage> {
               controller: _titleController,
               maxLength: 100,
               decoration: InputDecoration(
-                hintText: 'Brief title for the hazard (min 3 characters)',
+                hintText: 'e.g., Ocean Pollution, Plastic Waste, Oil Spill',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: Colors.grey.shade300),

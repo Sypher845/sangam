@@ -15,11 +15,21 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   late int _selectedIndex;
+  final PermissionService _permissionService = PermissionService();
 
   @override
   void initState() {
     super.initState();
     _selectedIndex = widget.initialIndex;
+    _requestLocationPermission();
+  }
+
+  Future<void> _requestLocationPermission() async {
+    // Request location permission on app start
+    final hasPermission = await _permissionService.hasLocationPermission();
+    if (!hasPermission && mounted) {
+      await _permissionService.requestLocationPermission();
+    }
   }
 
   void _onNavigationTap(int index) {
