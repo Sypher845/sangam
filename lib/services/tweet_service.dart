@@ -54,6 +54,48 @@ class TweetService {
     return response;
   }
 
+  // Get verified tweets
+  Future<ApiResponse<List<Tweet>>> getVerifiedTweets({
+    required double latitude,
+    required double longitude,
+    int? radius,
+  }) async {
+    final url = ApiConstants.buildVerifiedTweetsUrl(
+      latitude: latitude,
+      longitude: longitude,
+      radius: radius,
+    );
+
+    final response = await _apiService.getList<Tweet>(
+      url,
+      requiresAuth: true,
+      fromJson: Tweet.fromJson,
+    );
+
+    return response;
+  }
+
+  // Get unverified tweets
+  Future<ApiResponse<List<Tweet>>> getUnverifiedTweets({
+    required double latitude,
+    required double longitude,
+    int? radius,
+  }) async {
+    final url = ApiConstants.buildUnverifiedTweetsUrl(
+      latitude: latitude,
+      longitude: longitude,
+      radius: radius,
+    );
+
+    final response = await _apiService.getList<Tweet>(
+      url,
+      requiresAuth: true,
+      fromJson: Tweet.fromJson,
+    );
+
+    return response;
+  }
+
   // Create a new tweet/hazard report
   Future<ApiResponse<Tweet>> createTweet({
     required String hazardType,

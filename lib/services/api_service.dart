@@ -80,7 +80,31 @@ class ApiService {
   ) {
     try {
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        final List<dynamic> data = json.decode(response.body);
+        final dynamic decodedBody = json.decode(response.body);
+        
+        List<dynamic> data;
+        
+        // Handle both direct array and wrapped object responses
+        if (decodedBody is List) {
+          // Direct array: [...]
+          data = decodedBody;
+        } else if (decodedBody is Map<String, dynamic>) {
+          // Wrapped response: {"tweets": [...]} or {"data": [...]}
+          // Try common keys
+          if (decodedBody.containsKey('tweets')) {
+            data = decodedBody['tweets'] as List<dynamic>;
+          } else if (decodedBody.containsKey('data')) {
+            data = decodedBody['data'] as List<dynamic>;
+          } else if (decodedBody.containsKey('results')) {
+            data = decodedBody['results'] as List<dynamic>;
+          } else {
+            // If no known key, return empty list
+            data = [];
+          }
+        } else {
+          data = [];
+        }
+        
         final List<T> items = data
             .map((item) => fromJson(item as Map<String, dynamic>))
             .toList();

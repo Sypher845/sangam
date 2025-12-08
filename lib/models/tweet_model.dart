@@ -15,6 +15,7 @@ class Tweet {
   final List<TweetImage> images;
   final bool isUpvoted;
   final bool isDownvoted;
+  final bool isVerified;
 
   Tweet({
     required this.id,
@@ -33,6 +34,7 @@ class Tweet {
     required this.images,
     this.isUpvoted = false,
     this.isDownvoted = false,
+    this.isVerified = false,
   });
 
   factory Tweet.fromJson(Map<String, dynamic> json) {
@@ -64,6 +66,7 @@ class Tweet {
           [],
       isUpvoted: json['is_upvoted'] as bool? ?? false,
       isDownvoted: json['is_downvoted'] as bool? ?? false,
+      isVerified: json['is_verified'] as bool? ?? false,
     );
   }
 
@@ -85,6 +88,7 @@ class Tweet {
       'images': images.map((image) => image.toJson()).toList(),
       'is_upvoted': isUpvoted,
       'is_downvoted': isDownvoted,
+      'is_verified': isVerified,
     };
   }
 
@@ -105,6 +109,7 @@ class Tweet {
     List<TweetImage>? images,
     bool? isUpvoted,
     bool? isDownvoted,
+    bool? isVerified,
   }) {
     return Tweet(
       id: id ?? this.id,
@@ -123,6 +128,7 @@ class Tweet {
       images: images ?? this.images,
       isUpvoted: isUpvoted ?? this.isUpvoted,
       isDownvoted: isDownvoted ?? this.isDownvoted,
+      isVerified: isVerified ?? this.isVerified,
     );
   }
 

@@ -21,6 +21,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   // Tweet related state
   List<Tweet> _tweets = [];
+  List<Tweet> _verifiedTweets = [];
+  List<Tweet> _unverifiedTweets = [];
   bool _isLoading = true;
   String? _errorMessage;
   Position? _currentPosition;
@@ -70,16 +72,27 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       final double lat = _currentPosition?.latitude ?? 19.0760;
       final double lng = _currentPosition?.longitude ?? 72.8777;
 
-      // Fetch nearby tweets with fixed 30km radius
-      final response = await _tweetService.getNearbyTweets(
+      // Fetch verified tweets first with location
+      final verifiedResponse = await _tweetService.getVerifiedTweets(
+        latitude: lat,
+        longitude: lng,
+        radius: _radiusKm.toInt(),
+      );
+      
+      // Fetch unverified tweets with location
+      final unverifiedResponse = await _tweetService.getUnverifiedTweets(
         latitude: lat,
         longitude: lng,
         radius: _radiusKm.toInt(),
       );
 
-      if (response.isSuccess && response.data != null) {
+      if (verifiedResponse.isSuccess || unverifiedResponse.isSuccess) {
         setState(() {
-          _tweets = response.data!;
+          _verifiedTweets = verifiedResponse.data ?? [];
+          _unverifiedTweets = unverifiedResponse.data ?? [];
+          
+          // Combine: verified first, then unverified
+          _tweets = [..._verifiedTweets, ..._unverifiedTweets];
           _isLoading = false;
         });
 
@@ -87,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         _updateMapMarkers();
       } else {
         setState(() {
-          _errorMessage = response.message ?? 'Failed to load tweets';
+          _errorMessage = verifiedResponse.message ?? unverifiedResponse.message ?? 'Failed to load tweets';
           _isLoading = false;
         });
       }
@@ -370,11 +383,31 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           color: Color(0xFF2C3E50),
                         ),
                       ),
-                      Text(
-                        '${_tweets.length} reports within ${_radiusKm}km',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
+                      RichText(
+                        text: TextSpan(
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                          children: [
+                            TextSpan(text: '${_tweets.length} reports'),
+                            if (_verifiedTweets.isNotEmpty || _unverifiedTweets.isNotEmpty) ...[
+                              const TextSpan(text: ' ('),
+                              if (_verifiedTweets.isNotEmpty)
+                                TextSpan(
+                                  text: '${_verifiedTweets.length} verified',
+                                  style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w600),
+                                ),
+                              if (_verifiedTweets.isNotEmpty && _unverifiedTweets.isNotEmpty)
+                                const TextSpan(text: ', '),
+                              if (_unverifiedTweets.isNotEmpty)
+                                TextSpan(
+                                  text: '${_unverifiedTweets.length} unverified',
+                                  style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.w600),
+                                ),
+                              const TextSpan(text: ')'),
+                            ],
+                          ],
                         ),
                       ),
                     ],
@@ -486,19 +519,98 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     child: ListView.builder(
                       controller: _scrollController,
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
-                      itemCount: _tweets.length,
+                      itemCount: _tweets.length + (_verifiedTweets.isNotEmpty && _unverifiedTweets.isNotEmpty ? 2 : _verifiedTweets.isNotEmpty || _unverifiedTweets.isNotEmpty ? 1 : 0),
                       itemBuilder: (context, index) {
-                        final tweet = _tweets[index];
+                        // Show verified section header
+                        if (index == 0 && _verifiedTweets.isNotEmpty) {
+                          return Column(
+                            children: [
+                              _buildSectionHeader('Verified Reports', _verifiedTweets.length, Colors.green),
+                              const SizedBox(height: 12),
+                            ],
+                          );
+                        }
+                        
+                        // Show unverified section header
+                        if (_verifiedTweets.isNotEmpty && index == _verifiedTweets.length + 1 && _unverifiedTweets.isNotEmpty) {
+                          return Column(
+                            children: [
+                              const SizedBox(height: 8),
+                              _buildSectionHeader('Unverified Reports', _unverifiedTweets.length, Colors.orange),
+                              const SizedBox(height: 12),
+                            ],
+                          );
+                        }
+                        
+                        // Adjust index for headers
+                        int tweetIndex = index;
+                        if (_verifiedTweets.isNotEmpty) {
+                          tweetIndex = index - 1;
+                        }
+                        if (_verifiedTweets.isNotEmpty && _unverifiedTweets.isNotEmpty && index > _verifiedTweets.length + 1) {
+                          tweetIndex = index - 2;
+                        }
+                        
+                        if (tweetIndex < 0 || tweetIndex >= _tweets.length) {
+                          return const SizedBox.shrink();
+                        }
+                        
+                        final tweet = _tweets[tweetIndex];
                         return Column(
                           children: [
-                            _buildReportCard(index: index, tweet: tweet),
-                            if (index < _tweets.length - 1)
+                            _buildReportCard(index: tweetIndex, tweet: tweet),
+                            if (tweetIndex < _tweets.length - 1)
                               const SizedBox(height: 12),
                           ],
                         );
                       },
                     ),
                   ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title, int count, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            title.contains('Verified') ? Icons.verified : Icons.pending,
+            color: color,
+            size: 18,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              '$count',
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
           ),
         ],
       ),
@@ -533,51 +645,80 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image on the left
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+            // Image on the left with verification badge
+            Stack(
+              children: [
+                ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                ),
-                child: Image.network(
-                  imageUrl,
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      width: 80,
-                      height: 80,
+                  child: Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
                       color: Colors.grey.shade300,
-                      child: Icon(
-                        Icons.image_not_supported,
-                        color: Colors.grey.shade600,
-                        size: 32,
-                      ),
-                    );
-                  },
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Container(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Image.network(
+                      imageUrl,
                       width: 80,
                       height: 80,
-                      color: Colors.grey.shade200,
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.grey.shade500,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          width: 80,
+                          height: 80,
+                          color: Colors.grey.shade300,
+                          child: Icon(
+                            Icons.image_not_supported,
+                            color: Colors.grey.shade600,
+                            size: 32,
                           ),
-                        ),
-                      ),
-                    );
-                  },
+                        );
+                      },
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Container(
+                          width: 80,
+                          height: 80,
+                          color: Colors.grey.shade200,
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.grey.shade500,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
                 ),
-              ),
+                // Verification badge overlay
+                if (tweet.isVerified)
+                  Positioned(
+                    top: 4,
+                    right: 4,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade600,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.3),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.verified,
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(width: 12),
             // Content on the right

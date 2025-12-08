@@ -1,6 +1,6 @@
 class ApiConstants {
   // Base URL Configuration
-  static const String BASE_URL = "http://10.0.2.2:8000/api";
+  static const String BASE_URL = "https://6c5d8cnc-8000.inc1.devtunnels.ms/api";
 
   // Authentication Endpoints
   static const String REGISTER_ENDPOINT = "$BASE_URL/auth/register";
@@ -15,11 +15,15 @@ class ApiConstants {
   static const String OTP_REQUEST_ENDPOINT = "$BASE_URL/auth/otp/request";
   static const String OTP_VERIFY_ENDPOINT = "$BASE_URL/auth/otp/verify";
 
+
+
   // Tweet Endpoints
   static const String CREATE_TWEET_ENDPOINT = "$BASE_URL/tweet/post";
   static const String NEARBY_TWEETS_ENDPOINT = "$BASE_URL/tweets/nearby";
   static const String MY_TWEETS_ENDPOINT = "$BASE_URL/tweets/me";
   static const String UPVOTED_TWEETS_ENDPOINT = "$BASE_URL/tweets/upvoted";
+  static const String VERIFIED_TWEETS_ENDPOINT = "$BASE_URL/tweet/verified";
+  static const String UNVERFIED_TWEETS_ENDPOINT = "$BASE_URL/tweet/unverified";
 
   // Tweet Actions (requires tweet_id parameter)
   static String getUpvoteTweetEndpoint(int tweetId) =>
@@ -172,5 +176,35 @@ class ApiConstants {
     };
 
     return buildUrlWithParams(NEARBY_TWEETS_ENDPOINT, params);
+  }
+
+  // Build Verified Tweets URL with coordinates and optional radius
+  static String buildVerifiedTweetsUrl({
+    required double latitude,
+    required double longitude,
+    int? radius,
+  }) {
+    final params = {
+      PARAM_LATITUDE: latitude,
+      PARAM_LONGITUDE: longitude,
+      if (radius != null) PARAM_RADIUS: radius,
+    };
+
+    return buildUrlWithParams(VERIFIED_TWEETS_ENDPOINT, params);
+  }
+
+  // Build Unverified Tweets URL with coordinates and optional radius
+  static String buildUnverifiedTweetsUrl({
+    required double latitude,
+    required double longitude,
+    int? radius,
+  }) {
+    final params = {
+      PARAM_LATITUDE: latitude,
+      PARAM_LONGITUDE: longitude,
+      if (radius != null) PARAM_RADIUS: radius,
+    };
+
+    return buildUrlWithParams(UNVERFIED_TWEETS_ENDPOINT, params);
   }
 }
