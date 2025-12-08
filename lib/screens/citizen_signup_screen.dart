@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/signup_provider.dart';
 import '../providers/auth_provider.dart';
-import 'home_screen.dart';
+import 'main_navigation_screen.dart';
 
 class CitizenSignUpScreen extends StatelessWidget {
   const CitizenSignUpScreen({super.key});
@@ -340,7 +340,7 @@ class _SignUpScreenContent extends StatelessWidget {
         context,
       ).showSnackBar(const SnackBar(content: Text('Account created')));
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        MaterialPageRoute(builder: (context) => const MainNavigationScreen(initialIndex: 0)),
         (route) => false,
       );
     } else if (context.mounted) {

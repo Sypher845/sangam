@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
-import '../services/permission_service.dart';
 import '../services/tweet_service.dart';
 import '../models/tweet_model.dart';
-import 'camera_capture_page.dart';
 import 'user_dashboard_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -15,7 +13,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-  int _selectedIndex = 2;
   late AnimationController _animationController;
   double _sheetHeight = 0.5; // Initial height at 50%
   GoogleMapController? _mapController;
@@ -184,67 +181,35 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     });
   }
 
-  Future<void> _handleCameraCapture() async {
-    final permissionService = PermissionService();
-
-    // Check if permissions are granted
-    final hasPermissions = await permissionService.hasAllRequiredPermissions();
-
-    if (!hasPermissions) {
-      if (!mounted) return;
-      final granted = await permissionService.requestAllPermissions(context);
-      if (!granted) {
-        return; // User denied permissions
-      }
-    }
-
-    // Navigate to camera capture page
-    if (!mounted) return;
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const CameraCapturePage()),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
-      body: Stack(
-        children: [
-          // Full-screen Google Map
-          _buildGoogleMap(),
+    return Stack(
+      children: [
+        // Full-screen Google Map
+        _buildGoogleMap(),
 
-          // Header
-          SafeArea(child: _buildHeader()),
+        // Header
+        SafeArea(child: _buildHeader()),
 
-          // Draggable Reports section
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            height: screenHeight * _sheetHeight,
-            child: GestureDetector(
-              onVerticalDragUpdate: (details) {
-                setState(() {
-                  _sheetHeight -= details.delta.dy / screenHeight;
-                  _sheetHeight = _sheetHeight.clamp(0.2, 0.8);
-                });
-              },
-              child: _buildReportsSection(),
-            ),
+        // Draggable Reports section
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: screenHeight * _sheetHeight,
+          child: GestureDetector(
+            onVerticalDragUpdate: (details) {
+              setState(() {
+                _sheetHeight -= details.delta.dy / screenHeight;
+                _sheetHeight = _sheetHeight.clamp(0.2, 0.8);
+              });
+            },
+            child: _buildReportsSection(),
           ),
-
-          // Floating navigation bar
-          Positioned(
-            bottom: 20,
-            left: 0,
-            right: 0,
-            child: _buildNavigationSlider(),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -747,131 +712,4 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildNavigationSlider() {
-    final List<NavigationItem> items = [
-      NavigationItem(icon: Icons.home_rounded, label: 'Home'),
-      NavigationItem(icon: Icons.share_rounded, label: 'Social\nmedia'),
-      NavigationItem(
-        icon: Icons.camera_alt_rounded,
-        label: 'Capture\nHazard',
-        isCenter: true,
-      ),
-      NavigationItem(icon: Icons.cloud_outlined, label: 'Weather'),
-      NavigationItem(icon: Icons.phone_in_talk_rounded, label: 'Emergency'),
-    ];
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: items.asMap().entries.map((entry) {
-          int index = entry.key;
-          NavigationItem item = entry.value;
-          bool isActive = _selectedIndex == index;
-          return Expanded(child: _buildNavItem(item, index, isActive));
-        }).toList(),
-      ),
-    );
-  }
-
-  Widget _buildNavItem(NavigationItem item, int index, bool isActive) {
-    return GestureDetector(
-      onTap: () async {
-        if (!isActive) {
-          _animationController.forward().then(
-            (_) => _animationController.reverse(),
-          );
-          setState(() => _selectedIndex = index);
-        }
-
-        // Handle camera capture navigation (center button)
-        if (index == 2 && item.isCenter) {
-          await _handleCameraCapture();
-        }
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (item.isCenter)
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFF3498DB), Color(0xFF2980B9)],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF3498DB).withValues(alpha: 0.4),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Icon(item.icon, color: Colors.white, size: 28),
-              )
-            else
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: isActive
-                      ? const Color(0xFF3498DB).withValues(alpha: 0.15)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(
-                  item.icon,
-                  color: isActive
-                      ? const Color(0xFF3498DB)
-                      : Colors.grey.shade600,
-                  size: 24,
-                ),
-              ),
-            const SizedBox(height: 6),
-            Text(
-              item.label,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 9,
-                color: isActive
-                    ? const Color(0xFF3498DB)
-                    : Colors.grey.shade600,
-                fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-                height: 1.2,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class NavigationItem {
-  final IconData icon;
-  final String label;
-  final bool isCenter;
-
-  NavigationItem({
-    required this.icon,
-    required this.label,
-    this.isCenter = false,
-  });
 }

@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../providers/auth_provider.dart';
 import 'citizen_signup_screen.dart';
-import 'home_screen.dart';
+import 'main_navigation_screen.dart';
 
 class CitizenLoginScreen extends StatefulWidget {
   const CitizenLoginScreen({super.key});
@@ -441,7 +441,7 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
         );
         // Navigate to home screen
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          MaterialPageRoute(builder: (context) => const MainNavigationScreen(initialIndex: 0)),
           (route) => false,
         );
       } else if (mounted && authProvider.errorMessage != null) {
