@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:sangam/widgets/translated_text.dart';
 
 import '../providers/signup_provider.dart';
 import '../providers/auth_provider.dart';
@@ -54,7 +55,7 @@ class _SignUpScreenContent extends StatelessWidget {
                           color: Colors.blue.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        child: Text(
+                        child: TranslatedText(
                           'Step ${provider.currentStep + 1} of 2',
                           style: const TextStyle(
                             fontSize: 12,
@@ -85,12 +86,12 @@ class _SignUpScreenContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        const TranslatedText(
           'Create Account',
           style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
-        const Text('Join the network and start reporting hazards.'),
+        const TranslatedText('Join the network and start reporting hazards.'),
         const SizedBox(height: 32),
 
         Row(
@@ -156,7 +157,7 @@ class _SignUpScreenContent extends StatelessWidget {
                       color: Colors.white,
                     ),
                   )
-                : const Text('Send OTP'),
+                : const TranslatedText('Send OTP'),
           ),
         ),
       ],
@@ -167,12 +168,12 @@ class _SignUpScreenContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        const TranslatedText(
           'Verify Number',
           style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
-        Text('We sent a code to +91 ${provider.phoneController.text}'),
+        TranslatedText('We sent a code to +91 ${provider.phoneController.text}'),
         const SizedBox(height: 24),
 
         _buildInputField(
@@ -194,7 +195,7 @@ class _SignUpScreenContent extends StatelessWidget {
           children: [
             TextButton(
               onPressed: () => _onResendOtp(context, provider),
-              child: const Text('Resend OTP'),
+              child: const TranslatedText('Resend OTP'),
             ),
           ],
         ),
@@ -217,7 +218,7 @@ class _SignUpScreenContent extends StatelessWidget {
                       color: Colors.white,
                     ),
                   )
-                : const Text('Create Account'),
+                : const TranslatedText('Create Account'),
           ),
         ),
       ],
@@ -235,7 +236,7 @@ class _SignUpScreenContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
+        TranslatedText(label, style: const TextStyle(fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
         TextField(
           controller: controller,
@@ -258,7 +259,7 @@ class _SignUpScreenContent extends StatelessWidget {
   Future<void> _onSendOtp(BuildContext context, SignUpProvider provider) async {
     if (!provider.validateStep1()) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all fields correctly')),
+        const SnackBar(content: TranslatedText('Please fill all fields correctly')),
       );
       return;
     }
@@ -282,12 +283,12 @@ class _SignUpScreenContent extends StatelessWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('OTP sent')));
+        ).showSnackBar(const SnackBar(content: TranslatedText('OTP sent')));
       }
     } else {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(auth.errorMessage ?? 'Failed to send OTP')),
+          SnackBar(content: TranslatedText(auth.errorMessage ?? 'Failed to send OTP')),
         );
       }
     }
@@ -302,10 +303,10 @@ class _SignUpScreenContent extends StatelessWidget {
     if (success && context.mounted) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('OTP resent')));
+      ).showSnackBar(const SnackBar(content: TranslatedText('OTP resent')));
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(auth.errorMessage ?? 'Could not resend OTP')),
+        SnackBar(content: TranslatedText(auth.errorMessage ?? 'Could not resend OTP')),
       );
     }
   }
@@ -317,7 +318,7 @@ class _SignUpScreenContent extends StatelessWidget {
     if (!provider.validateStep2()) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Enter a valid OTP')));
+      ).showSnackBar(const SnackBar(content: TranslatedText('Enter a valid OTP')));
       return;
     }
 
@@ -338,14 +339,14 @@ class _SignUpScreenContent extends StatelessWidget {
     if (success && context.mounted) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Account created')));
+      ).showSnackBar(const SnackBar(content: TranslatedText('Account created')));
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => const MainNavigationScreen(initialIndex: 0)),
         (route) => false,
       );
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(auth.errorMessage ?? 'Signup failed')),
+        SnackBar(content: TranslatedText(auth.errorMessage ?? 'Signup failed')),
       );
     }
   }

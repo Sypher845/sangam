@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sangam/widgets/translated_text.dart';
+import '../providers/language_provider.dart';
+import '../services/translation_service.dart';
 import '../providers/auth_provider.dart';
 import '../providers/user_provider.dart';
 import '../services/tweet_service.dart';
@@ -136,12 +139,55 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
     }
   }
 
+  // Language selector bottom sheet
+  Future<void> _showLanguageSelector(BuildContext context) async {
+    final langProvider = Provider.of<LanguageProvider>(context, listen: false);
+    String tempSelected = langProvider.currentLanguageCode;
+
+    await showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const TranslatedText(
+                'Choose Language',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              ...TranslationService.supportedLanguages.entries.map((entry) {
+                return RadioListTile<String>(
+                  value: entry.key,
+                  groupValue: tempSelected,
+                  title: Text(entry.value),
+                  onChanged: (value) {
+                    if (value != null) {
+                      tempSelected = value;
+                      langProvider.setLanguage(value);
+                      Navigator.pop(context);
+                    }
+                  },
+                );
+              }).toList(),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: const Text(
+        title: const TranslatedText(
           'User Dashboard',
           style: TextStyle(
             fontWeight: FontWeight.bold,
@@ -155,6 +201,14 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
           icon: const Icon(Icons.arrow_back, color: Color(0xFF2C3E50)),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.language, color: Color(0xFF2C3E50)),
+            onPressed: () async {
+              await _showLanguageSelector(context);
+            },
+          ),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: _loadUserData,
@@ -190,7 +244,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                         size: 32,
                       ),
                       const SizedBox(height: 8),
-                      Text(
+                      TranslatedText(
                         'Profile Error',
                         style: TextStyle(
                           color: Colors.red.shade600,
@@ -199,7 +253,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
+                      TranslatedText(
                         _profileError!,
                         textAlign: TextAlign.center,
                         style: TextStyle(
@@ -214,7 +268,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                           backgroundColor: Colors.red.shade600,
                           foregroundColor: Colors.white,
                         ),
-                        child: const Text('Retry'),
+                        child: const TranslatedText('Retry'),
                       ),
                     ],
                   ),
@@ -320,7 +374,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                     ),
                   ),
                   child: Center(
-                    child: Text(
+                    child: TranslatedText(
                       authProvider.userName?.isNotEmpty == true
                           ? authProvider.userName![0].toUpperCase()
                           : 'U',
@@ -336,7 +390,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
               const SizedBox(height: 20),
 
               // User Name with enhanced styling
-              Text(
+              TranslatedText(
                 authProvider.userName ?? 'User Name',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
@@ -378,7 +432,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Text(
+                    TranslatedText(
                       '+91 ${authProvider.userPhone ?? 'Not available'}',
                       style: const TextStyle(
                         fontSize: 16,
@@ -448,7 +502,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
           child: Icon(icon, color: Colors.white, size: 20),
         ),
         const SizedBox(height: 6),
-        Text(
+        TranslatedText(
           count,
           style: const TextStyle(
             fontSize: 18,
@@ -456,7 +510,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
             color: Colors.white,
           ),
         ),
-        Text(
+        TranslatedText(
           label,
           style: TextStyle(
             fontSize: 12,
@@ -485,7 +539,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          const TranslatedText(
             'Address Information',
             style: TextStyle(
               fontSize: 18,
@@ -551,7 +605,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              TranslatedText(
                 label,
                 style: const TextStyle(
                   fontSize: 14,
@@ -560,7 +614,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                 ),
               ),
               const SizedBox(height: 4),
-              Text(
+              TranslatedText(
                 address,
                 style: TextStyle(
                   fontSize: 14,
@@ -630,7 +684,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        TranslatedText(
                           title,
                           style: const TextStyle(
                             fontSize: 16,
@@ -639,7 +693,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        Text(
+                        TranslatedText(
                           subtitle,
                           style: TextStyle(
                             fontSize: 12,
@@ -687,7 +741,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                                 color: Colors.grey.shade600,
                               ),
                               const SizedBox(height: 12),
-                              Text(
+                              TranslatedText(
                                 error,
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
@@ -702,7 +756,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                                   backgroundColor: const Color(0xFF3498DB),
                                   foregroundColor: Colors.white,
                                 ),
-                                child: const Text('Retry'),
+                                child: const TranslatedText('Retry'),
                               ),
                             ],
                           ),
@@ -718,7 +772,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                                 color: Colors.grey.shade600,
                               ),
                               const SizedBox(height: 12),
-                              Text(
+                              TranslatedText(
                                 'No reports found',
                                 style: TextStyle(
                                   color: Colors.grey.shade600,
@@ -755,7 +809,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
           Row(
             children: [
               Expanded(
-                child: Text(
+                child: TranslatedText(
                   tweet.title,
                   style: const TextStyle(
                     fontSize: 15,
@@ -771,7 +825,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: const Color(0xFF3498DB)),
                 ),
-                child: Text(
+                child: TranslatedText(
                   tweet.hazardType,
                   style: const TextStyle(
                     fontSize: 10,
@@ -783,7 +837,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
             ],
           ),
           const SizedBox(height: 8),
-          Text(
+          TranslatedText(
             tweet.hazardDescription,
             style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
           ),
@@ -793,7 +847,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
               Icon(Icons.location_on, size: 14, color: Colors.grey.shade600),
               const SizedBox(width: 4),
               Flexible(
-                child: Text(
+                child: TranslatedText(
                   tweet.area,
                   style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
                   overflow: TextOverflow.ellipsis,
@@ -802,7 +856,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
               const SizedBox(width: 12),
               Icon(Icons.access_time, size: 14, color: Colors.grey.shade600),
               const SizedBox(width: 4),
-              Text(
+              TranslatedText(
                 _getTimeAgo(tweet.createdAt),
                 style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
               ),
@@ -815,7 +869,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                     : Colors.grey.shade600,
               ),
               const SizedBox(width: 4),
-              Text(
+              TranslatedText(
                 '${tweet.upvoteCount}',
                 style: TextStyle(
                   fontSize: 11,
@@ -844,15 +898,15 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                     final shouldLogout = await showDialog<bool>(
                       context: context,
                       builder: (context) => AlertDialog(
-                        title: const Text('Logout'),
-                        content: const Text('Are you sure you want to logout?'),
+                        title: const TranslatedText('Logout'),
+                        content: const TranslatedText('Are you sure you want to logout?'),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(context, false),
-                            child: const Text('Cancel'),
+                            child: const TranslatedText('Cancel'),
                           ),
                           ElevatedButton(
                             onPressed: () => Navigator.pop(context, true),
@@ -860,7 +914,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                               backgroundColor: Colors.red,
                               foregroundColor: Colors.white,
                             ),
-                            child: const Text('Logout'),
+                            child: const TranslatedText('Logout'),
                           ),
                         ],
                       ),
@@ -893,7 +947,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
                   )
-                : const Text(
+                : const TranslatedText(
                     'Logout',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),

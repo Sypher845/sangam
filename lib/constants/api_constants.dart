@@ -1,6 +1,6 @@
 class ApiConstants {
   // Base URL Configuration
-  static const String BASE_URL = "https://6c5d8cnc-8000.inc1.devtunnels.ms/api";
+  static const String BASE_URL = "https://sclgw5l3-8000.inc1.devtunnels.ms/api";
 
   // Authentication Endpoints
   static const String REGISTER_ENDPOINT = "$BASE_URL/auth/register";
@@ -111,9 +111,9 @@ class ApiConstants {
 
   // Default Values
   static const int DEFAULT_RADIUS_KM = 40;
-  static const int REQUEST_TIMEOUT_SECONDS = 30;
-  static const int CONNECT_TIMEOUT_SECONDS = 30;
-  static const int RECEIVE_TIMEOUT_SECONDS = 30;
+  static const int REQUEST_TIMEOUT_SECONDS = 150;
+  static const int CONNECT_TIMEOUT_SECONDS = 150;
+  static const int RECEIVE_TIMEOUT_SECONDS = 150;
 
   // HTTP Status Codes
   static const int STATUS_OK = 200;

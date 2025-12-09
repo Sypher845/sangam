@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sangam/widgets/translated_text.dart';
 import 'home_screen.dart';
 import 'emergency_screen.dart';
 import 'camera_capture_page.dart';
@@ -42,8 +43,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         index: _selectedIndex,
         children: [
           HomeScreenContent(onNavigationTap: _onNavigationTap, currentIndex: _selectedIndex),
-          const Center(child: Text('Social Media - Coming Soon', style: TextStyle(fontSize: 24))),
-          const Center(child: Text('Camera Capture', style: TextStyle(fontSize: 24))),
+          const Center(child: TranslatedText('Social Media - Coming Soon', style: TextStyle(fontSize: 24))),
+          const Center(child: TranslatedText('Camera Capture', style: TextStyle(fontSize: 24))),
           const WeatherScreen(),
           const EmergencyScreen(),
         ],
@@ -146,7 +147,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 ),
               ),
             const SizedBox(height: 6),
-            Text(
+            TranslatedText(
               item.label,
               textAlign: TextAlign.center,
               style: TextStyle(

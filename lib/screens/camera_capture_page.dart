@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:sangam/widgets/translated_text.dart';
 import '../services/permission_service.dart';
 import '../services/tweet_service.dart';
 
@@ -154,12 +155,12 @@ class _CameraCapturePageState extends State<CameraCapturePage>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Error'),
-        content: Text(message),
+        title: const TranslatedText('Error'),
+        content: TranslatedText(message),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+            child: const TranslatedText('OK'),
           ),
         ],
       ),
@@ -177,7 +178,7 @@ class _CameraCapturePageState extends State<CameraCapturePage>
           icon: const Icon(Icons.close, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text(
+        title: const TranslatedText(
           'Capture Hazard',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
         ),
@@ -190,7 +191,7 @@ class _CameraCapturePageState extends State<CameraCapturePage>
                 children: [
                   CircularProgressIndicator(color: Color(0xFF3498DB)),
                   SizedBox(height: 16),
-                  Text(
+                  TranslatedText(
                     'Initializing Camera...',
                     style: TextStyle(color: Colors.white),
                   ),
@@ -208,12 +209,12 @@ class _CameraCapturePageState extends State<CameraCapturePage>
                     color: Colors.grey,
                   ),
                   const SizedBox(height: 16),
-                  const Text(
+                  const TranslatedText(
                     'Camera not available',
                     style: TextStyle(color: Colors.white, fontSize: 18),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
+                  const TranslatedText(
                     'Please check camera permissions',
                     style: TextStyle(color: Colors.grey, fontSize: 14),
                   ),
@@ -223,7 +224,7 @@ class _CameraCapturePageState extends State<CameraCapturePage>
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF3498DB),
                     ),
-                    child: const Text('Retry'),
+                    child: const TranslatedText('Retry'),
                   ),
                 ],
               ),
@@ -260,7 +261,7 @@ class _CameraCapturePageState extends State<CameraCapturePage>
                           size: 16,
                         ),
                         const SizedBox(width: 8),
-                        Text(
+                        TranslatedText(
                           _currentLocation != null
                               ? 'Location: ${_currentLocation!.latitude.toStringAsFixed(4)}, ${_currentLocation!.longitude.toStringAsFixed(4)}'
                               : 'Location unavailable',
@@ -399,7 +400,7 @@ class _HazardPreviewPageState extends State<HazardPreviewPage> {
             const Icon(Icons.warning_amber_outlined, color: Colors.white),
             const SizedBox(width: 8),
             Expanded(
-              child: Text(
+              child: TranslatedText(
                 message,
                 style: const TextStyle(fontWeight: FontWeight.w500),
               ),
@@ -440,7 +441,7 @@ class _HazardPreviewPageState extends State<HazardPreviewPage> {
     if (widget.location == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Location is required to submit a hazard report'),
+          content: TranslatedText('Location is required to submit a hazard report'),
           backgroundColor: Colors.red,
         ),
       );
@@ -458,7 +459,7 @@ class _HazardPreviewPageState extends State<HazardPreviewPage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text(
+              content: TranslatedText(
                 'Image file not found. Please capture the photo again.',
               ),
               backgroundColor: Colors.red,
@@ -475,7 +476,7 @@ class _HazardPreviewPageState extends State<HazardPreviewPage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text(
+              content: TranslatedText(
                 'Image file is too large (max 10MB allowed). Please capture a smaller image.',
               ),
               backgroundColor: Colors.red,
@@ -505,7 +506,7 @@ class _HazardPreviewPageState extends State<HazardPreviewPage> {
                   Icon(Icons.check_circle, color: Colors.white),
                   SizedBox(width: 8),
                   Expanded(
-                    child: Text(
+                    child: TranslatedText(
                       'Hazard report submitted successfully!',
                       style: TextStyle(fontWeight: FontWeight.w500),
                     ),
@@ -543,7 +544,7 @@ class _HazardPreviewPageState extends State<HazardPreviewPage> {
                   const Icon(Icons.error_outline, color: Colors.white),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
+                    child: TranslatedText(
                       errorMessage,
                       style: const TextStyle(fontWeight: FontWeight.w500),
                     ),
@@ -565,7 +566,7 @@ class _HazardPreviewPageState extends State<HazardPreviewPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to submit report: ${e.toString()}'),
+            content: TranslatedText('Failed to submit report: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -588,7 +589,7 @@ class _HazardPreviewPageState extends State<HazardPreviewPage> {
           icon: const Icon(Icons.arrow_back, color: Color(0xFF2C3E50)),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text(
+        title: const TranslatedText(
           'Report Hazard',
           style: TextStyle(
             color: Color(0xFF2C3E50),
@@ -640,7 +641,7 @@ class _HazardPreviewPageState extends State<HazardPreviewPage> {
                         children: [
                           Icon(Icons.camera_alt, color: Colors.white, size: 12),
                           SizedBox(width: 4),
-                          Text(
+                          TranslatedText(
                             'Captured',
                             style: TextStyle(
                               color: Colors.white,
@@ -676,7 +677,7 @@ class _HazardPreviewPageState extends State<HazardPreviewPage> {
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Text(
+                      child: TranslatedText(
                         'Location: ${widget.location!.latitude.toStringAsFixed(6)}, ${widget.location!.longitude.toStringAsFixed(6)}',
                         style: const TextStyle(
                           color: Color(0xFF2C3E50),
@@ -691,7 +692,7 @@ class _HazardPreviewPageState extends State<HazardPreviewPage> {
             const SizedBox(height: 20),
 
             // Hazard Type field (replaces both dropdown and title)
-            const Text(
+            const TranslatedText(
               'Hazard Type *',
               style: TextStyle(
                 fontSize: 16,
@@ -721,7 +722,7 @@ class _HazardPreviewPageState extends State<HazardPreviewPage> {
             const SizedBox(height: 20),
 
             // Description field
-            const Text(
+            const TranslatedText(
               'Description *',
               style: TextStyle(
                 fontSize: 16,
@@ -782,7 +783,7 @@ class _HazardPreviewPageState extends State<HazardPreviewPage> {
                             ),
                           ),
                           SizedBox(width: 12),
-                          Text(
+                          TranslatedText(
                             'Submitting...',
                             style: TextStyle(
                               fontSize: 16,
@@ -792,7 +793,7 @@ class _HazardPreviewPageState extends State<HazardPreviewPage> {
                           ),
                         ],
                       )
-                    : const Text(
+                    : const TranslatedText(
                         'Submit Report',
                         style: TextStyle(
                           fontSize: 16,
@@ -816,7 +817,7 @@ class _HazardPreviewPageState extends State<HazardPreviewPage> {
                   const Icon(Icons.info_outline, color: Colors.grey, size: 16),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
+                    child: TranslatedText(
                       'Your report will help the community stay informed about ocean hazards and environmental issues.',
                       style: TextStyle(
                         fontSize: 12,

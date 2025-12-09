@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:sangam/widgets/translated_text.dart';
 import '../services/tweet_service.dart';
 import '../models/tweet_model.dart';
 import 'user_dashboard_screen.dart';
@@ -187,7 +188,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             children: [
               Icon(Icons.info_outline, color: Colors.white),
               SizedBox(width: 8),
-              Text('You have already upvoted this report'),
+              TranslatedText('You have already upvoted this report'),
             ],
           ),
           backgroundColor: Colors.orange,
@@ -233,7 +234,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 children: [
                   Icon(Icons.thumb_up, color: Colors.white, size: 18),
                   SizedBox(width: 8),
-                  Text('Report upvoted successfully'),
+                  TranslatedText('Report upvoted successfully'),
                 ],
               ),
               backgroundColor: Colors.green,
@@ -271,7 +272,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   const Icon(Icons.error_outline, color: Colors.white),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(response.message ?? 'Failed to upvote report'),
+                    child: TranslatedText(response.message ?? 'Failed to upvote report'),
                   ),
                 ],
               ),
@@ -310,7 +311,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               children: [
                 const Icon(Icons.error_outline, color: Colors.white),
                 const SizedBox(width: 8),
-                Expanded(child: Text('Error: ${e.toString()}')),
+                Expanded(child: TranslatedText('Error: ${e.toString()}')),
               ],
             ),
             backgroundColor: Colors.red,
@@ -378,7 +379,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             children: [
               const CircularProgressIndicator(color: Color(0xFF3498DB)),
               const SizedBox(height: 16),
-              Text(
+              TranslatedText(
                 'Getting your location...',
                 style: TextStyle(
                   fontSize: 16,
@@ -387,7 +388,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
               ),
               const SizedBox(height: 8),
-              Text(
+              TranslatedText(
                 'Please ensure location services are enabled',
                 style: TextStyle(
                   fontSize: 12,
@@ -591,7 +592,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      const TranslatedText(
                         'Crowd-sourced Reports',
                         style: TextStyle(
                           fontSize: 18,
@@ -649,7 +650,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     color: const Color(0xFF3498DB),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Text(
+                  child: const TranslatedText(
                     'Live',
                     style: TextStyle(
                       color: Colors.white,
@@ -679,7 +680,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           color: Colors.grey.shade600,
                         ),
                         const SizedBox(height: 16),
-                        Text(
+                        TranslatedText(
                           _errorMessage!,
                           textAlign: TextAlign.center,
                           style: TextStyle(
@@ -694,7 +695,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             backgroundColor: const Color(0xFF3498DB),
                             foregroundColor: Colors.white,
                           ),
-                          child: const Text('Retry'),
+                          child: const TranslatedText('Retry'),
                         ),
                       ],
                     ),
@@ -710,7 +711,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           color: Colors.grey.shade600,
                         ),
                         const SizedBox(height: 16),
-                        Text(
+                        TranslatedText(
                           'No reports found in your area\n(${_radiusKm}km radius)',
                           textAlign: TextAlign.center,
                           style: TextStyle(
@@ -725,7 +726,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             backgroundColor: const Color(0xFF3498DB),
                             foregroundColor: Colors.white,
                           ),
-                          child: const Text('Refresh'),
+                          child: const TranslatedText('Refresh'),
                         ),
                       ],
                     ),
@@ -804,7 +805,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             size: 18,
           ),
           const SizedBox(width: 8),
-          Text(
+          TranslatedText(
             title,
             style: TextStyle(
               fontSize: 14,
@@ -819,7 +820,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               color: color,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Text(
+            child: TranslatedText(
               '$count',
               style: const TextStyle(
                 fontSize: 12,
@@ -945,7 +946,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(
+                        child: TranslatedText(
                           tweet.hazardType.isNotEmpty ? tweet.hazardType : tweet.title,
                           style: const TextStyle(
                             fontSize: 15,
@@ -962,7 +963,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     crossFadeState: isExpanded
                         ? CrossFadeState.showSecond
                         : CrossFadeState.showFirst,
-                    firstChild: Text(
+                    firstChild: TranslatedText(
                       tweet.hazardDescription,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -971,7 +972,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         color: Colors.grey.shade700,
                       ),
                     ),
-                    secondChild: Text(
+                    secondChild: TranslatedText(
                       tweet.hazardDescription,
                       style: TextStyle(
                         fontSize: 13,
@@ -989,7 +990,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ),
                       const SizedBox(width: 4),
                       Flexible(
-                        child: Text(
+                        child: TranslatedText(
                           tweet.area,
                           style: TextStyle(
                             fontSize: 11,
@@ -1005,7 +1006,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         color: Colors.grey.shade600,
                       ),
                       const SizedBox(width: 4),
-                      Text(
+                      TranslatedText(
                         timeAgo,
                         style: TextStyle(
                           fontSize: 11,
@@ -1027,7 +1028,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   : Colors.grey.shade600,
                             ),
                             const SizedBox(width: 6),
-                            Text(
+                            TranslatedText(
                               '${tweet.upvoteCount}',
                               style: TextStyle(
                                 fontSize: 13,

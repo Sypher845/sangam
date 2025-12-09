@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:sangam/widgets/translated_text.dart';
 import '../providers/user_provider.dart';
 import '../providers/auth_provider.dart';
 import 'citizen_signup_screen.dart';
@@ -72,7 +73,7 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
                             color: const Color(0xFF3498DB),
                           ),
                           const SizedBox(width: 8),
-                          const Text(
+                          const TranslatedText(
                             'Citizen Reporter',
                             style: TextStyle(
                               fontSize: 12,
@@ -87,7 +88,7 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
                     const SizedBox(height: 40),
 
                     // Title
-                    const Text(
+                    const TranslatedText(
                       'Welcome Back',
                       style: TextStyle(
                         fontSize: 28,
@@ -96,7 +97,7 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
+                    const TranslatedText(
                       'Sign in to start reporting hazards and contribute to ocean intelligence',
                       style: TextStyle(
                         fontSize: 14,
@@ -109,7 +110,7 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
 
                     // Phone number input
                     if (!_isOtpSent) ...[
-                      const Text(
+                      const TranslatedText(
                         'Mobile Number',
                         style: TextStyle(
                           fontSize: 14,
@@ -153,7 +154,7 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
 
                     // OTP input
                     if (_isOtpSent) ...[
-                      const Text(
+                      const TranslatedText(
                         'Enter OTP',
                         style: TextStyle(
                           fontSize: 14,
@@ -162,7 +163,7 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Text(
+                      TranslatedText(
                         'We sent a verification code to +91 ${_phoneController.text}',
                         style: const TextStyle(
                           fontSize: 12,
@@ -212,7 +213,7 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
                                 _otpController.clear();
                               });
                             },
-                            child: const Text(
+                            child: const TranslatedText(
                               'Change Number',
                               style: TextStyle(
                                 color: Color(0xFF3498DB),
@@ -231,13 +232,13 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
                               if (success && mounted) {
                                 scaffoldMessenger.showSnackBar(
                                   const SnackBar(
-                                    content: Text('OTP sent successfully!'),
+                                    content: TranslatedText('OTP sent successfully!'),
                                     backgroundColor: Colors.green,
                                   ),
                                 );
                               }
                             },
-                            child: const Text(
+                            child: const TranslatedText(
                               'Resend OTP',
                               style: TextStyle(
                                 color: Color(0xFF3498DB),
@@ -280,7 +281,7 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
                                   strokeWidth: 2,
                                 ),
                               )
-                            : Text(
+                            : TranslatedText(
                                 _isOtpSent ? 'Verify & Login' : 'Send OTP',
                                 style: const TextStyle(
                                   fontSize: 16,
@@ -303,7 +304,7 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
+                          child: TranslatedText(
                             'OR',
                             style: TextStyle(
                               color: Colors.grey.withValues(alpha: 0.7),
@@ -340,7 +341,7 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Text(
+                        child: const TranslatedText(
                           'Create New Account',
                           style: TextStyle(
                             fontSize: 16,
@@ -411,7 +412,7 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
         if (mounted) {
           scaffoldMessenger.showSnackBar(
             const SnackBar(
-              content: Text('OTP sent successfully!'),
+              content: TranslatedText('OTP sent successfully!'),
               backgroundColor: Colors.green,
             ),
           );
@@ -420,7 +421,7 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
         if (mounted && authProvider.errorMessage != null) {
           scaffoldMessenger.showSnackBar(
             SnackBar(
-              content: Text(authProvider.errorMessage!),
+              content: TranslatedText(authProvider.errorMessage!),
               backgroundColor: Colors.red,
             ),
           );
@@ -435,7 +436,7 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
       if (otpValid && mounted) {
         scaffoldMessenger.showSnackBar(
           const SnackBar(
-            content: Text('Login successful!'),
+            content: TranslatedText('Login successful!'),
             backgroundColor: Colors.green,
           ),
         );
@@ -447,7 +448,7 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
       } else if (mounted && authProvider.errorMessage != null) {
         scaffoldMessenger.showSnackBar(
           SnackBar(
-            content: Text(authProvider.errorMessage!),
+            content: TranslatedText(authProvider.errorMessage!),
             backgroundColor: Colors.red,
           ),
         );
@@ -455,7 +456,7 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
         if (mounted && authProvider.errorMessage != null) {
           scaffoldMessenger.showSnackBar(
             SnackBar(
-              content: Text(authProvider.errorMessage!),
+              content: TranslatedText(authProvider.errorMessage!),
               backgroundColor: Colors.red,
             ),
           );
