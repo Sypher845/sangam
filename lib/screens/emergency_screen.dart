@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sangam/widgets/translated_text.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class EmergencyScreen extends StatelessWidget {
@@ -61,7 +62,7 @@ class EmergencyScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
+                  const TranslatedText(
                     'Emergency Helpline',
                     style: TextStyle(
                       fontSize: 30,
@@ -80,7 +81,7 @@ class EmergencyScreen extends StatelessWidget {
                       color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Text(
+                    child: const TranslatedText(
                       '24/7 Available',
                       style: TextStyle(
                         fontSize: 14,
@@ -173,7 +174,7 @@ class EmergencyScreen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  Text(
+                  TranslatedText(
                     'Emergency Number',
                     style: TextStyle(
                       fontSize: 16,
@@ -183,7 +184,7 @@ class EmergencyScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Text(
+                  TranslatedText(
                     '9420473470',
                     style: TextStyle(
                       fontSize: 38,
@@ -220,7 +221,7 @@ class EmergencyScreen extends StatelessWidget {
                     children: [
                       Icon(Icons.phone, size: 30),
                       SizedBox(width: 16),
-                      Text(
+                      TranslatedText(
                         'Call Now',
                         style: TextStyle(
                           fontSize: 22,
@@ -266,7 +267,7 @@ class EmergencyScreen extends StatelessWidget {
                       ),
                       const SizedBox(width: 12),
                       const Expanded(
-                        child: Text(
+                        child: TranslatedText(
                           'For immediate assistance',
                           style: TextStyle(
                             fontSize: 16,
@@ -278,7 +279,7 @@ class EmergencyScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 14),
-                  Text(
+                  TranslatedText(
                     'This helpline is available 24/7 for water-related emergencies, hazard reporting, and urgent assistance.',
                     style: TextStyle(
                       fontSize: 14,

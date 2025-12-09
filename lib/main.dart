@@ -7,6 +7,7 @@ import 'screens/main_navigation_screen.dart';
 import 'services/permission_service.dart';
 import 'services/api_service.dart';
 import 'services/storage_service.dart';
+import 'providers/language_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,9 +39,9 @@ Future<void> _initializeServices() async {
 }
 
 class MyApp extends StatefulWidget {
-  final PermissionService permissionService;
+  final PermissionService? permissionService;
 
-  const MyApp({super.key, required this.permissionService});
+  const MyApp({super.key, this.permissionService});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -82,7 +83,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         ChangeNotifierProvider(
           create: (context) {
             final userProvider = UserProvider();
-            // Initialize auth status on app startup
             userProvider.checkAuthStatus();
             return userProvider;
           },
@@ -90,22 +90,36 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         ChangeNotifierProvider(
           create: (context) {
             final authProvider = AuthProvider();
-            // Initialize auth state on app startup
             authProvider.initializeAuth();
             return authProvider;
           },
         ),
-      ],
-      child: MaterialApp(
-        title: 'Sangam',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          useMaterial3: true,
+        ChangeNotifierProvider(
+          create: (context) {
+            final langProvider = LanguageProvider();
+            langProvider.initialise();
+            return langProvider;
+          },
         ),
-        debugShowCheckedModeBanner: false,
-        home: const GettingStartedScreen(),
-        routes: {
-          '/home': (context) => const MainNavigationScreen(initialIndex: 0),
+      ],
+      child: Consumer2<LanguageProvider, AuthProvider>(
+        builder: (context, langProvider, authProvider, _) {
+          final isLoggedIn = authProvider.isAuthenticated;
+          return MaterialApp(
+            title: 'Sangam',
+            locale: Locale(langProvider.currentLanguageCode),
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+              useMaterial3: true,
+            ),
+            debugShowCheckedModeBanner: false,
+            home: isLoggedIn
+                ? const MainNavigationScreen(initialIndex: 0)
+                : const GettingStartedScreen(),
+            routes: {
+              '/home': (context) => const MainNavigationScreen(initialIndex: 0),
+            },
+          );
         },
       ),
     );

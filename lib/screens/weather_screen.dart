@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:sangam/widgets/translated_text.dart';
 import 'dart:math' as math;
 import '../models/weather_model.dart';
 import '../services/weather_service.dart';
@@ -168,7 +169,7 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
             ),
           ),
           const SizedBox(height: 24),
-          const Text(
+          const TranslatedText(
             'Loading Weather Data...',
             style: TextStyle(
               color: Colors.white,
@@ -201,7 +202,7 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
               ),
             ),
             const SizedBox(height: 24),
-            const Text(
+            const TranslatedText(
               'Unable to Load Weather',
               style: TextStyle(
                 color: Colors.white,
@@ -210,7 +211,7 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
               ),
             ),
             const SizedBox(height: 12),
-            Text(
+            TranslatedText(
               _error ?? 'Please check your connection and try again',
               textAlign: TextAlign.center,
               style: const TextStyle(
@@ -222,7 +223,7 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
             ElevatedButton.icon(
               onPressed: _loadWeatherData,
               icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
+              label: const TranslatedText('Retry'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: Colors.blue.shade700,
@@ -256,7 +257,7 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
                       size: 20,
                     ),
                     const SizedBox(width: 8),
-                    Text(
+                    TranslatedText(
                       _currentWeather?.cityName ?? 'Unknown',
                       style: const TextStyle(
                         fontSize: 24,
@@ -267,7 +268,7 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text(
+                TranslatedText(
                   _getFormattedDate(),
                   style: TextStyle(
                     fontSize: 14,
@@ -342,7 +343,7 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  TranslatedText(
                     '${_currentWeather!.temperature.round()}°',
                     style: const TextStyle(
                       fontSize: 80,
@@ -352,7 +353,7 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
+                  TranslatedText(
                     _currentWeather!.description.toUpperCase(),
                     style: TextStyle(
                       fontSize: 14,
@@ -377,7 +378,7 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
               children: [
                 const Icon(Icons.thermostat, color: Colors.white, size: 20),
                 const SizedBox(width: 8),
-                Text(
+                TranslatedText(
                   'Feels like ${_currentWeather!.feelsLike.round()}°C',
                   style: const TextStyle(
                     fontSize: 16,
@@ -450,7 +451,7 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                TranslatedText(
                   isSafe ? 'Safe for Fishing' : 'Unsafe for Fishing',
                   style: const TextStyle(
                     fontSize: 22,
@@ -459,7 +460,7 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
+                TranslatedText(
                   isSafe
                       ? 'Conditions are favorable'
                       : _currentWeather!.fishingSafetyMessage.split(':').last,
@@ -493,7 +494,7 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          const TranslatedText(
             'Ocean Conditions',
             style: TextStyle(
               fontSize: 20,
@@ -597,7 +598,7 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
         children: [
           Icon(icon, color: Colors.white, size: 32),
           const SizedBox(height: 12),
-          Text(
+          TranslatedText(
             label,
             style: TextStyle(
               fontSize: 12,
@@ -610,7 +611,7 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
+              TranslatedText(
                 value,
                 style: const TextStyle(
                   fontSize: 24,
@@ -622,7 +623,7 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
                 const SizedBox(width: 4),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 2),
-                  child: Text(
+                  child: TranslatedText(
                     unit,
                     style: TextStyle(
                       fontSize: 14,
@@ -635,7 +636,7 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
           ),
           if (subtitle != null) ...[
             const SizedBox(height: 4),
-            Text(
+            TranslatedText(
               subtitle,
               style: TextStyle(
                 fontSize: 12,
@@ -666,7 +667,7 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          const TranslatedText(
             '5-Day Forecast',
             style: TextStyle(
               fontSize: 20,
@@ -720,7 +721,7 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                TranslatedText(
                   '${weather.temperature.round()}°C',
                   style: const TextStyle(
                     fontSize: 24,
@@ -729,7 +730,7 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
+                TranslatedText(
                   weather.description,
                   style: TextStyle(
                     fontSize: 13,
@@ -763,7 +764,7 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
                   size: 16,
                 ),
                 const SizedBox(width: 6),
-                Text(
+                TranslatedText(
                   isSafe ? 'Safe' : 'Unsafe',
                   style: const TextStyle(
                     fontSize: 13,

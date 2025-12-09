@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:async';
+import 'package:provider/provider.dart';
+import '../providers/language_provider.dart';
+import '../widgets/translated_text.dart';
+import '../services/translation_service.dart';
 import 'package:sangam/constants/app_colors.dart';
 import 'package:sangam/constants/app_assets.dart';
 import 'package:sangam/constants/app_strings.dart';
@@ -75,7 +79,7 @@ class _GettingStartedScreenState extends State<GettingStartedScreen> {
               ),
               const SizedBox(width: 12),
               const Expanded(
-                child: Text(
+                child: TranslatedText(
                   'Location Access',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
@@ -86,7 +90,7 @@ class _GettingStartedScreenState extends State<GettingStartedScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              const TranslatedText(
                 'Sangam needs your location to provide you with:',
                 style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
               ),
@@ -113,7 +117,7 @@ class _GettingStartedScreenState extends State<GettingStartedScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: Text(
+              child: TranslatedText(
                 'Not Now',
                 style: TextStyle(color: Colors.grey.shade600),
               ),
@@ -128,7 +132,7 @@ class _GettingStartedScreenState extends State<GettingStartedScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text(
+              child: const TranslatedText(
                 'Allow Location',
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
@@ -156,7 +160,7 @@ class _GettingStartedScreenState extends State<GettingStartedScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              TranslatedText(
                 title,
                 style: const TextStyle(
                   fontSize: 14,
@@ -165,7 +169,7 @@ class _GettingStartedScreenState extends State<GettingStartedScreen> {
                 ),
               ),
               const SizedBox(height: 2),
-              Text(
+              TranslatedText(
                 description,
                 style: TextStyle(
                   fontSize: 12,
@@ -312,12 +316,11 @@ class _GettingStartedScreenState extends State<GettingStartedScreen> {
                 ),
                 const SizedBox(height: 12),
                 // Tagline
-                Text(
+                TranslatedText(
                   AppStrings.gettingStartedTagline,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,
-                    color: AppColors.textPrimary,
                     height: 1.5,
                     fontWeight: FontWeight.w500,
                   ),
@@ -413,17 +416,75 @@ class _GettingStartedScreenState extends State<GettingStartedScreen> {
                         elevation: 3,
                         shadowColor: AppColors.primary.withValues(alpha: 0.4),
                       ),
-                      child: Text(
-                        AppStrings.getStartedButton,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.white,
-                          letterSpacing: 0.5,
-                        ),
+                      child: FutureBuilder<String>(
+                        future: Provider.of<LanguageProvider>(context, listen: false)
+                            .translate(AppStrings.getStartedButton),
+                        builder: (context, snapshot) {
+                          return TranslatedText(
+                            snapshot.data ?? AppStrings.getStartedButton,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                              letterSpacing: 0.5,
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ),
+                    const SizedBox(height: 20),
+
+                    // Language selection dropdown
+                    Consumer<LanguageProvider>(
+                      builder: (context, langProvider, _) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            FutureBuilder<String>(
+                              future: langProvider.translate('Select Language'),
+                              builder: (context, snapshot) {
+                                return TranslatedText(
+                                  snapshot.data ?? 'Select Language',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.grey.shade300),
+                              ),
+                              child: DropdownButton<String>(
+                                value: langProvider.currentLanguageCode,
+                                icon: const Icon(Icons.keyboard_arrow_down),
+                                underline: const SizedBox(),  
+                                isExpanded: true,
+                                items: TranslationService.supportedLanguages.entries
+                                    .map(
+                                      (entry) => DropdownMenuItem<String>(
+                                        value: entry.key,
+                                        child: Text(entry.value),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (code) {
+                                  if (code != null) {
+                                    langProvider.setLanguage(code);
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
                     const SizedBox(height: 20),
                   ],
                 ),
