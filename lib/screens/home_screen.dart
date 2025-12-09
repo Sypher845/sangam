@@ -16,6 +16,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late AnimationController _animationController;
   late TabController _tabController;
+  late TabController _tabController;
   double _sheetHeight = 0.5; // Initial height at 50%
   GoogleMapController? _mapController;
   int? _expandedCardIndex; // Track which card is expanded

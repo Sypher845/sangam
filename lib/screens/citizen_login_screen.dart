@@ -40,6 +40,26 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    // Reset loading states when screen is initialized
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        
+        // Reset loading states to ensure button is not stuck in loading
+        authProvider.setLoading(false);
+        userProvider.setLoading(false);
+        
+        // Clear any previous errors
+        authProvider.clearError();
+        userProvider.clearError();
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
@@ -427,11 +447,14 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
     UserProvider userProvider,
   ) async {
     if (!mounted) return;
+    if (!mounted) return;
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
     if (!_isOtpSent) {
       // Send OTP
       final success = await authProvider.sendLoginOtp(_phoneController.text);
+      if (!mounted) return;
+      
       if (!mounted) return;
       
       if (success) {
@@ -465,6 +488,9 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
       if (!mounted) return;
       
       if (otpValid) {
+      if (!mounted) return;
+      
+      if (otpValid) {
         scaffoldMessenger.showSnackBar(
           const SnackBar(
             content: TranslatedText('Login successful!'),
@@ -476,6 +502,7 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
           MaterialPageRoute(builder: (context) => const MainNavigationScreen(initialIndex: 0)),
           (route) => false,
         );
+      } else if (authProvider.errorMessage != null) {
       } else if (authProvider.errorMessage != null) {
         scaffoldMessenger.showSnackBar(
           SnackBar(

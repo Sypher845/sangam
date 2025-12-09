@@ -108,6 +108,7 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
                               children: [
                                 _buildHeader(),
                                 // const SizedBox(height: 8),
+                                // const SizedBox(height: 8),
                                 _buildMainWeatherCard(),
                                 _buildFishingSafetyCard(),
                                 _buildDetailedConditions(),
@@ -355,8 +356,6 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
                     ),
                   ),
                   const SizedBox(height: 8),
-                  TranslatedText(
-                  const SizedBox(height: 6),
                   Text(
                     _currentWeather!.description.toUpperCase(),
                     style: TextStyle(
