@@ -1,6 +1,6 @@
 class ApiConstants {
   // Base URL Configuration
-  static const String BASE_URL = "https://6c5d8cnc-8000.inc1.devtunnels.ms/api";
+  static const String BASE_URL = "https://sclgw5l3-8000.inc1.devtunnels.ms/api";
 
   // Authentication Endpoints
   static const String REGISTER_ENDPOINT = "$BASE_URL/auth/register";

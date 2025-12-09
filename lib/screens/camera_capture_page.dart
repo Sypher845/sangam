@@ -54,9 +54,16 @@ class _CameraCapturePageState extends State<CameraCapturePage>
     setState(() => _isLoading = true);
 
     try {
-      // Check permissions first
-      final hasPermissions = await _permissionService
-          .hasAllRequiredPermissions();
+      // Start permission check and camera fetch in parallel
+      final permissionFuture = _permissionService.hasAllRequiredPermissions();
+      final camerasFuture = availableCameras();
+
+      // Wait for both to complete
+      final results = await Future.wait([permissionFuture, camerasFuture]);
+      final hasPermissions = results[0] as bool;
+      _cameras = results[1] as List<CameraDescription>;
+
+      // Handle permissions if needed
       if (!hasPermissions) {
         final granted = await _permissionService.requestAllPermissions(context);
         if (!granted) {
@@ -65,33 +72,44 @@ class _CameraCapturePageState extends State<CameraCapturePage>
         }
       }
 
-      // Get available cameras
-      _cameras = await availableCameras();
       if (_cameras.isEmpty) {
         _showErrorDialog('No cameras available on this device');
+        setState(() => _isLoading = false);
         return;
       }
 
-      // Initialize camera controller with back camera
+      // Initialize camera controller with optimized settings
+      // Using low resolution for faster initialization
       _cameraController = CameraController(
         _cameras[_selectedCameraIndex],
-        ResolutionPreset.high,
+        ResolutionPreset.low, // Changed from medium to low for faster init
         enableAudio: false,
         imageFormatGroup: ImageFormatGroup.jpeg,
       );
 
       await _cameraController!.initialize();
 
-      // Get current location
-      _currentLocation = await _permissionService.getCurrentLocation();
+      // Show camera immediately, get location in background
+      if (mounted) {
+        setState(() {
+          _isInitialized = true;
+          _isLoading = false;
+        });
+      }
 
-      setState(() {
-        _isInitialized = true;
-        _isLoading = false;
+      // Get current location in background (non-blocking)
+      _permissionService.getCurrentLocation().then((location) {
+        if (mounted) {
+          setState(() {
+            _currentLocation = location;
+          });
+        }
       });
     } catch (e) {
-      setState(() => _isLoading = false);
-      _showErrorDialog('Failed to initialize camera: $e');
+      if (mounted) {
+        setState(() => _isLoading = false);
+        _showErrorDialog('Failed to initialize camera: $e');
+      }
     }
   }
 
@@ -106,17 +124,21 @@ class _CameraCapturePageState extends State<CameraCapturePage>
 
     _cameraController = CameraController(
       _cameras[_selectedCameraIndex],
-      ResolutionPreset.high,
+      ResolutionPreset.low, // Changed from medium to low for faster switching
       enableAudio: false,
       imageFormatGroup: ImageFormatGroup.jpeg,
     );
 
     try {
       await _cameraController!.initialize();
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     } catch (e) {
-      setState(() => _isLoading = false);
-      _showErrorDialog('Failed to switch camera: $e');
+      if (mounted) {
+        setState(() => _isLoading = false);
+        _showErrorDialog('Failed to switch camera: $e');
+      }
     }
   }
 
@@ -126,10 +148,12 @@ class _CameraCapturePageState extends State<CameraCapturePage>
     setState(() => _isCapturing = true);
 
     try {
-      // Refresh location before capture
-      _currentLocation = await _permissionService.getCurrentLocation();
-
+      // Capture the photo immediately
       final image = await _cameraController!.takePicture();
+
+      // Use existing location (already fetched during initialization)
+      // Only refresh if location is null
+      _currentLocation ??= await _permissionService.getCurrentLocation();
 
       // Navigate to preview screen with captured image
       if (mounted) {
@@ -144,9 +168,13 @@ class _CameraCapturePageState extends State<CameraCapturePage>
         );
       }
     } catch (e) {
-      _showErrorDialog('Failed to capture photo: $e');
+      if (mounted) {
+        _showErrorDialog('Failed to capture photo: $e');
+      }
     } finally {
-      setState(() => _isCapturing = false);
+      if (mounted) {
+        setState(() => _isCapturing = false);
+      }
     }
   }
 
@@ -449,6 +477,65 @@ class _HazardPreviewPageState extends State<HazardPreviewPage> {
 
     setState(() => _isSubmitting = true);
 
+    // Show AI credibility loading dialog
+    if (mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Dialog(
+            backgroundColor: Colors.transparent,
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF3498DB).withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.psychology,
+                      size: 48,
+                      color: Color(0xFF3498DB),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Analyzing Report',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF2C3E50),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Finding Credibility by AI...',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const CircularProgressIndicator(
+                    color: Color(0xFF3498DB),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    }
+
     try {
       // Prepare image file
       final imageFile = File(widget.imagePath);
@@ -456,6 +543,7 @@ class _HazardPreviewPageState extends State<HazardPreviewPage> {
       // Check if file exists
       if (!await imageFile.exists()) {
         if (mounted) {
+          Navigator.of(context).pop(); // Close loading dialog
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text(
@@ -473,6 +561,7 @@ class _HazardPreviewPageState extends State<HazardPreviewPage> {
       if (fileSize > 10 * 1024 * 1024) {
         // 10MB limit
         if (mounted) {
+          Navigator.of(context).pop(); // Close loading dialog
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text(
@@ -497,6 +586,8 @@ class _HazardPreviewPageState extends State<HazardPreviewPage> {
       );
 
       if (mounted) {
+        Navigator.of(context).pop(); // Close loading dialog
+        
         if (response.isSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -563,6 +654,7 @@ class _HazardPreviewPageState extends State<HazardPreviewPage> {
       }
     } catch (e) {
       if (mounted) {
+        Navigator.of(context).pop(); // Close loading dialog
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to submit report: ${e.toString()}'),

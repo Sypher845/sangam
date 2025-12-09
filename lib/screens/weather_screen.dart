@@ -106,6 +106,7 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
                                   child: Column(
                               children: [
                                 _buildHeader(),
+                                // const SizedBox(height: 8),
                                 _buildMainWeatherCard(),
                                 _buildFishingSafetyCard(),
                                 _buildDetailedConditions(),
@@ -117,11 +118,12 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
                               : Column(
                                   children: [
                                     _buildHeader(),
+                                    // const SizedBox(height: 8),
                                     _buildMainWeatherCard(),
                                     _buildFishingSafetyCard(),
                                     _buildDetailedConditions(),
                                     _buildForecastSection(),
-                                    const SizedBox(height: 100),
+                                    const SizedBox(height: 80),
                                   ],
                                 ),
                         ),
@@ -241,7 +243,7 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
   Widget _buildHeader() {
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -296,8 +298,8 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
     if (_currentWeather == null) return const SizedBox.shrink();
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.all(32),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -307,7 +309,7 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
             Colors.white.withOpacity(0.1),
           ],
         ),
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: Colors.white.withOpacity(0.3),
           width: 1.5,
@@ -328,36 +330,36 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
             children: [
               Image.network(
                 _weatherService.getWeatherIconUrl(_currentWeather!.icon),
-                width: 120,
-                height: 120,
+                width: 90,
+                height: 90,
                 errorBuilder: (context, error, stackTrace) {
                   return const Icon(
                     Icons.wb_sunny,
-                    size: 120,
+                    size: 90,
                     color: Colors.white,
                   );
                 },
               ),
-              const SizedBox(width: 20),
+              const SizedBox(width: 16),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     '${_currentWeather!.temperature.round()}°',
                     style: const TextStyle(
-                      fontSize: 80,
+                      fontSize: 64,
                       fontWeight: FontWeight.w300,
                       color: Colors.white,
                       height: 1,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   Text(
                     _currentWeather!.description.toUpperCase(),
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 13,
                       color: Colors.white.withOpacity(0.9),
-                      letterSpacing: 1.5,
+                      letterSpacing: 1.2,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -365,9 +367,9 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 12),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.2),
               borderRadius: BorderRadius.circular(20),
@@ -400,8 +402,8 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
     final color = isSafe ? const Color(0xFF4CAF50) : const Color(0xFFFF5252);
 
     return Container(
-      margin: const EdgeInsets.all(20),
-      padding: const EdgeInsets.all(24),
+      margin: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -480,8 +482,8 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
     if (_currentWeather == null) return const SizedBox.shrink();
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.all(24),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.15),
         borderRadius: BorderRadius.circular(24),
@@ -501,7 +503,7 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
               color: Colors.white,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 14),
           Row(
             children: [
               Expanded(
@@ -653,8 +655,8 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
     if (_forecast.isEmpty) return const SizedBox.shrink();
 
     return Container(
-      margin: const EdgeInsets.all(20),
-      padding: const EdgeInsets.all(24),
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.15),
         borderRadius: BorderRadius.circular(24),
@@ -674,7 +676,7 @@ class _WeatherScreenState extends State<WeatherScreen> with TickerProviderStateM
               color: Colors.white,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 14),
           ..._forecast.asMap().entries.map((entry) {
             final index = entry.key;
             final weather = entry.value;

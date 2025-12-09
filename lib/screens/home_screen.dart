@@ -14,6 +14,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late AnimationController _animationController;
+  late TabController _tabController;
   double _sheetHeight = 0.5; // Initial height at 50%
   GoogleMapController? _mapController;
   int? _expandedCardIndex; // Track which card is expanded
@@ -38,6 +39,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
+    _tabController = TabController(length: 2, vsync: this);
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
     _loadTweets();
@@ -96,18 +98,26 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       debugPrint('✅ Unverified tweets: ${unverifiedResponse.data?.length ?? 0}');
 
       if (verifiedResponse.isSuccess || unverifiedResponse.isSuccess) {
+        final verifiedList = verifiedResponse.data ?? [];
+        final unverifiedList = unverifiedResponse.data ?? [];
+        
+        debugPrint('📊 Setting state with ${verifiedList.length} verified and ${unverifiedList.length} unverified tweets');
+        
         setState(() {
-          _verifiedTweets = verifiedResponse.data ?? [];
-          _unverifiedTweets = unverifiedResponse.data ?? [];
+          _verifiedTweets = verifiedList;
+          _unverifiedTweets = unverifiedList;
           
           // Combine: verified first, then unverified
           _tweets = [..._verifiedTweets, ..._unverifiedTweets];
           _isLoading = false;
         });
 
+        debugPrint('✅ State updated. Total tweets: ${_tweets.length}');
+        
         // Update map markers after loading tweets
         _updateMapMarkers();
       } else {
+        debugPrint('❌ Failed to load tweets: ${verifiedResponse.message ?? unverifiedResponse.message}');
         setState(() {
           _errorMessage = verifiedResponse.message ?? unverifiedResponse.message ?? 'Failed to load tweets';
           _isLoading = false;
@@ -175,6 +185,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       return '${difference.inMinutes}m ago';
     } else {
       return 'Just now';
+    }
+  }
+
+  Color _getCredibilityColor(int credibility) {
+    // Credibility is from 1-10
+    if (credibility >= 7) {
+      return Colors.green.shade700; // High credibility (7-10)
+    } else if (credibility >= 4) {
+      return Colors.orange.shade700; // Medium credibility (4-6)
+    } else {
+      return Colors.red.shade700; // Low credibility (1-3)
     }
   }
 
@@ -324,6 +345,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   void dispose() {
     _animationController.dispose();
+    _tabController.dispose();
     _mapController?.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -479,21 +501,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  double _getMarkerColor(String hazardType) {
-    switch (hazardType.toLowerCase()) {
-      case 'pollution':
-        return BitmapDescriptor.hueRed;
-      case 'water quality':
-        return BitmapDescriptor.hueBlue;
-      case 'marine life':
-        return BitmapDescriptor.hueGreen;
-      case 'plastic waste':
-        return BitmapDescriptor.hueOrange;
-      default:
-        return BitmapDescriptor.hueViolet;
-    }
-  }
-
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.all(16.0),
@@ -582,51 +589,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
           // Section Header
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Row(
               children: [
                 const Icon(Icons.report, color: Color(0xFF3498DB), size: 24),
                 const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Crowd-sourced Reports',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF2C3E50),
-                        ),
-                      ),
-                      RichText(
-                        text: TextSpan(
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                          ),
-                          children: [
-                            TextSpan(text: '${_tweets.length} reports'),
-                            if (_verifiedTweets.isNotEmpty || _unverifiedTweets.isNotEmpty) ...[
-                              const TextSpan(text: ' ('),
-                              if (_verifiedTweets.isNotEmpty)
-                                TextSpan(
-                                  text: '${_verifiedTweets.length} verified',
-                                  style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w600),
-                                ),
-                              if (_verifiedTweets.isNotEmpty && _unverifiedTweets.isNotEmpty)
-                                const TextSpan(text: ', '),
-                              if (_unverifiedTweets.isNotEmpty)
-                                TextSpan(
-                                  text: '${_unverifiedTweets.length} unverified',
-                                  style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.w600),
-                                ),
-                              const TextSpan(text: ')'),
-                            ],
-                          ],
-                        ),
-                      ),
-                    ],
+                const Expanded(
+                  child: Text(
+                    'Crowd-sourced Reports',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF2C3E50),
+                    ),
                   ),
                 ),
                 GestureDetector(
@@ -662,7 +637,53 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
 
-          // Reports List
+          // Tab Bar
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: TabBar(
+              controller: _tabController,
+              indicator: BoxDecoration(
+                color: const Color(0xFF3498DB),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              labelColor: Colors.white,
+              unselectedLabelColor: Colors.grey.shade700,
+              labelStyle: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+              tabs: [
+                Tab(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.verified, size: 16),
+                      const SizedBox(width: 6),
+                      Text('Verified (${_verifiedTweets.length})'),
+                    ],
+                  ),
+                ),
+                Tab(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.pending, size: 16),
+                      const SizedBox(width: 6),
+                      Text('Unverified (${_unverifiedTweets.length})'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // Tab View Content
           Expanded(
             child: _isLoading
                 ? const Center(
@@ -699,88 +720,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ],
                     ),
                   )
-                : _tweets.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.location_off,
-                          size: 48,
-                          color: Colors.grey.shade600,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No reports found in your area\n(${_radiusKm}km radius)',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 14,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: _refreshTweets,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF3498DB),
-                            foregroundColor: Colors.white,
-                          ),
-                          child: const Text('Refresh'),
-                        ),
-                      ],
-                    ),
-                  )
-                : RefreshIndicator(
-                    onRefresh: _refreshTweets,
-                    child: ListView.builder(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                      itemCount: _tweets.length + (_verifiedTweets.isNotEmpty && _unverifiedTweets.isNotEmpty ? 2 : _verifiedTweets.isNotEmpty || _unverifiedTweets.isNotEmpty ? 1 : 0),
-                      itemBuilder: (context, index) {
-                        // Show verified section header
-                        if (index == 0 && _verifiedTweets.isNotEmpty) {
-                          return Column(
-                            children: [
-                              _buildSectionHeader('Verified Reports', _verifiedTweets.length, Colors.green),
-                              const SizedBox(height: 12),
-                            ],
-                          );
-                        }
-                        
-                        // Show unverified section header
-                        if (_verifiedTweets.isNotEmpty && index == _verifiedTweets.length + 1 && _unverifiedTweets.isNotEmpty) {
-                          return Column(
-                            children: [
-                              const SizedBox(height: 8),
-                              _buildSectionHeader('Unverified Reports', _unverifiedTweets.length, Colors.orange),
-                              const SizedBox(height: 12),
-                            ],
-                          );
-                        }
-                        
-                        // Adjust index for headers
-                        int tweetIndex = index;
-                        if (_verifiedTweets.isNotEmpty) {
-                          tweetIndex = index - 1;
-                        }
-                        if (_verifiedTweets.isNotEmpty && _unverifiedTweets.isNotEmpty && index > _verifiedTweets.length + 1) {
-                          tweetIndex = index - 2;
-                        }
-                        
-                        if (tweetIndex < 0 || tweetIndex >= _tweets.length) {
-                          return const SizedBox.shrink();
-                        }
-                        
-                        final tweet = _tweets[tweetIndex];
-                        return Column(
-                          children: [
-                            _buildReportCard(index: tweetIndex, tweet: tweet),
-                            if (tweetIndex < _tweets.length - 1)
-                              const SizedBox(height: 12),
-                          ],
-                        );
-                      },
-                    ),
+                : TabBarView(
+                    controller: _tabController,
+                    children: [
+                      // Verified Reports Tab
+                      _buildReportsList(_verifiedTweets, 'verified'),
+                      // Unverified Reports Tab
+                      _buildReportsList(_unverifiedTweets, 'unverified'),
+                    ],
                   ),
           ),
         ],
@@ -788,50 +735,63 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildSectionHeader(String title, int count, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            title.contains('Verified') ? Icons.verified : Icons.pending,
-            color: color,
-            size: 18,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: color,
+  Widget _buildReportsList(List<Tweet> tweets, String type) {
+    debugPrint('🔍 Building $type reports list with ${tweets.length} items');
+    
+    if (tweets.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              type == 'verified' ? Icons.verified_outlined : Icons.pending_outlined,
+              size: 48,
+              color: Colors.grey.shade400,
             ),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              '$count',
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+            const SizedBox(height: 16),
+            Text(
+              'No $type reports found\nin your area (${_radiusKm}km radius)',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 14,
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _refreshTweets,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF3498DB),
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Refresh'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _refreshTweets,
+      child: ListView.builder(
+        key: PageStorageKey<String>('reports_list_$type'),
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        itemCount: tweets.length,
+        itemBuilder: (context, index) {
+          final tweet = tweets[index];
+          debugPrint('📝 Building card for tweet ${tweet.id} at index $index');
+          return Column(
+            children: [
+              _buildReportCard(index: index, tweet: tweet),
+              if (index < tweets.length - 1) const SizedBox(height: 12),
+            ],
+          );
+        },
       ),
     );
   }
+
+
 
   Widget _buildReportCard({required int index, required Tweet tweet}) {
     final bool isExpanded = _expandedCardIndex == index;
@@ -954,6 +914,41 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           ),
                         ),
                       ),
+                      // Credibility indicator for unverified reports in top right
+                      if (!tweet.isVerified && tweet.credibility != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: _getCredibilityColor(tweet.credibility!).withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: _getCredibilityColor(tweet.credibility!),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.verified_user,
+                                size: 14,
+                                color: _getCredibilityColor(tweet.credibility!),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${tweet.credibility!}/10',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: _getCredibilityColor(tweet.credibility!),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                     ],
                   ),
                   const SizedBox(height: 8),

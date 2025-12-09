@@ -19,25 +19,43 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
   bool _isOtpSent = false;
 
   @override
+  void initState() {
+    super.initState();
+    // Reset loading states when screen is initialized
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        
+        // Reset loading states to ensure button is not stuck in loading
+        authProvider.setLoading(false);
+        userProvider.setLoading(false);
+        
+        // Clear any previous errors
+        authProvider.clearError();
+        userProvider.clearError();
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Consumer2<UserProvider, AuthProvider>(
-      builder: (context, userProvider, authProvider, child) {
-        return Scaffold(
-          body: Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/background.png'),
-                fit: BoxFit.cover,
-              ),
-            ),
-            child: SafeArea(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+    return Scaffold(
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/background.png'),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                     // Back button
                     IconButton(
                       onPressed: () => Navigator.pop(context),
@@ -220,30 +238,36 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
                               ),
                             ),
                           ),
-                          TextButton(
-                            onPressed: () async {
-                              final scaffoldMessenger = ScaffoldMessenger.of(
-                                context,
-                              );
-                              final success = await authProvider.resendOtp(
-                                _phoneController.text,
-                              );
-                              if (success && mounted) {
-                                scaffoldMessenger.showSnackBar(
-                                  const SnackBar(
-                                    content: Text('OTP sent successfully!'),
-                                    backgroundColor: Colors.green,
+                          Consumer<AuthProvider>(
+                            builder: (context, authProvider, child) {
+                              return TextButton(
+                                onPressed: () async {
+                                  if (!mounted) return;
+                                  final scaffoldMessenger = ScaffoldMessenger.of(
+                                    context,
+                                  );
+                                  final success = await authProvider.resendOtp(
+                                    _phoneController.text,
+                                  );
+                                  if (!mounted) return;
+                                  if (success) {
+                                    scaffoldMessenger.showSnackBar(
+                                      const SnackBar(
+                                        content: Text('OTP sent successfully!'),
+                                        backgroundColor: Colors.green,
+                                      ),
+                                    );
+                                  }
+                                },
+                                child: const Text(
+                                  'Resend OTP',
+                                  style: TextStyle(
+                                    color: Color(0xFF3498DB),
+                                    fontSize: 12,
                                   ),
-                                );
-                              }
+                                ),
+                              );
                             },
-                            child: const Text(
-                              'Resend OTP',
-                              style: TextStyle(
-                                color: Color(0xFF3498DB),
-                                fontSize: 12,
-                              ),
-                            ),
                           ),
                         ],
                       ),
@@ -252,43 +276,47 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
                     const SizedBox(height: 30),
 
                     // Action button
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed:
-                            (authProvider.isLoading || userProvider.isLoading)
-                            ? null
-                            : () => _handleButtonPress(
-                                context,
-                                authProvider,
-                                userProvider,
+                    Consumer2<AuthProvider, UserProvider>(
+                      builder: (context, authProvider, userProvider, child) {
+                        return SizedBox(
+                          width: double.infinity,
+                          height: 50,
+                          child: ElevatedButton(
+                            onPressed:
+                                (authProvider.isLoading || userProvider.isLoading)
+                                ? null
+                                : () => _handleButtonPress(
+                                    context,
+                                    authProvider,
+                                    userProvider,
+                                  ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF3498DB),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF3498DB),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                              elevation: 2,
+                            ),
+                            child: authProvider.isLoading || userProvider.isLoading
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Text(
+                                    _isOtpSent ? 'Verify & Login' : 'Send OTP',
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
+                                    ),
+                                  ),
                           ),
-                          elevation: 2,
-                        ),
-                        child: authProvider.isLoading || userProvider.isLoading
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : Text(
-                                _isOtpSent ? 'Verify & Login' : 'Send OTP',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
-                              ),
-                      ),
+                        );
+                      },
                     ),
 
                     const SizedBox(height: 30),
@@ -384,13 +412,11 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ),
+              ],
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -399,32 +425,31 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
     AuthProvider authProvider,
     UserProvider userProvider,
   ) async {
+    if (!mounted) return;
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
     if (!_isOtpSent) {
       // Send OTP
       final success = await authProvider.sendLoginOtp(_phoneController.text);
+      if (!mounted) return;
+      
       if (success) {
         setState(() {
           _isOtpSent = true;
         });
-        if (mounted) {
-          scaffoldMessenger.showSnackBar(
-            const SnackBar(
-              content: Text('OTP sent successfully!'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        }
-      } else {
-        if (mounted && authProvider.errorMessage != null) {
-          scaffoldMessenger.showSnackBar(
-            SnackBar(
-              content: Text(authProvider.errorMessage!),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
+        scaffoldMessenger.showSnackBar(
+          const SnackBar(
+            content: Text('OTP sent successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else if (authProvider.errorMessage != null) {
+        scaffoldMessenger.showSnackBar(
+          SnackBar(
+            content: Text(authProvider.errorMessage!),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     } else {
       // Verify OTP and Login
@@ -432,7 +457,9 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
         _phoneController.text,
         _otpController.text,
       );
-      if (otpValid && mounted) {
+      if (!mounted) return;
+      
+      if (otpValid) {
         scaffoldMessenger.showSnackBar(
           const SnackBar(
             content: Text('Login successful!'),
@@ -444,22 +471,13 @@ class _CitizenLoginScreenState extends State<CitizenLoginScreen> {
           MaterialPageRoute(builder: (context) => const MainNavigationScreen(initialIndex: 0)),
           (route) => false,
         );
-      } else if (mounted && authProvider.errorMessage != null) {
+      } else if (authProvider.errorMessage != null) {
         scaffoldMessenger.showSnackBar(
           SnackBar(
             content: Text(authProvider.errorMessage!),
             backgroundColor: Colors.red,
           ),
         );
-      } else {
-        if (mounted && authProvider.errorMessage != null) {
-          scaffoldMessenger.showSnackBar(
-            SnackBar(
-              content: Text(authProvider.errorMessage!),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
       }
     }
   }
