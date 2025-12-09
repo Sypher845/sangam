@@ -16,6 +16,7 @@ class Tweet {
   final bool isUpvoted;
   final bool isDownvoted;
   final bool isVerified;
+  final int? credibility;
 
   Tweet({
     required this.id,
@@ -35,6 +36,7 @@ class Tweet {
     this.isUpvoted = false,
     this.isDownvoted = false,
     this.isVerified = false,
+    this.credibility,
   });
 
   factory Tweet.fromJson(Map<String, dynamic> json) {
@@ -67,6 +69,7 @@ class Tweet {
       isUpvoted: json['is_upvoted'] as bool? ?? false,
       isDownvoted: json['is_downvoted'] as bool? ?? false,
       isVerified: json['is_verified'] as bool? ?? false,
+      credibility: json['credibility'] as int?,
     );
   }
 
@@ -89,6 +92,7 @@ class Tweet {
       'is_upvoted': isUpvoted,
       'is_downvoted': isDownvoted,
       'is_verified': isVerified,
+      'credibility': credibility,
     };
   }
 
@@ -110,6 +114,7 @@ class Tweet {
     bool? isUpvoted,
     bool? isDownvoted,
     bool? isVerified,
+    int? credibility,
   }) {
     return Tweet(
       id: id ?? this.id,
@@ -129,6 +134,7 @@ class Tweet {
       isUpvoted: isUpvoted ?? this.isUpvoted,
       isDownvoted: isDownvoted ?? this.isDownvoted,
       isVerified: isVerified ?? this.isVerified,
+      credibility: credibility ?? this.credibility,
     );
   }
 

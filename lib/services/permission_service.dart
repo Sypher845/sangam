@@ -80,15 +80,23 @@ class PermissionService {
         if (!granted) return null;
       }
 
+      // Use medium accuracy for faster location fix (good enough for hazard reporting)
+      // This typically takes 1-3 seconds instead of 5-10 seconds
       final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-        timeLimit: const Duration(seconds: 10),
+        desiredAccuracy: LocationAccuracy.medium,
+        timeLimit: const Duration(seconds: 5),
       );
       
       return position;
     } catch (e) {
       debugPrint('Error getting location: $e');
-      return null;
+      // Try to get last known location as fallback
+      try {
+        return await Geolocator.getLastKnownPosition();
+      } catch (e) {
+        debugPrint('Error getting last known location: $e');
+        return null;
+      }
     }
   }
 
